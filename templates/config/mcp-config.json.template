@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "changelog-rag": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "<PROJECT_ROOT>/tools/changelog_rag",
+        "run",
+        "python",
+        "-m",
+        "changelog_rag.server"
+      ],
+      "env": {
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "CHANGELOG_RAG_AGENTS_MD": "<PROJECT_ROOT>/决策日志.md"
+      }
+    }
+  }
+}
