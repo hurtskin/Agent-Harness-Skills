@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from drift_check.adapters.asset_radar import AssetRadarAdapter
+from drift_check.adapters.base import SpecAdapter
 from drift_check.detectors.common import DriftFinding, Severity
 
 
@@ -68,7 +68,7 @@ def _slug_match(bug_slug: str, summary: str) -> bool:
     return False
 
 
-def detect(adapter: AssetRadarAdapter) -> list[DriftFinding]:
+def detect(adapter: SpecAdapter) -> list[DriftFinding]:
     """Detect drift between bug sub-specs and parent spec §9.5 changelog.
 
     Algorithm:

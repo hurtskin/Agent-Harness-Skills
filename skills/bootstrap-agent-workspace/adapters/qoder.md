@@ -13,11 +13,11 @@ Qoder 默认支持项目根 `AGENTS.md`、本机项目差异文件 `AGENTS.local
 ## 生成策略
 
 1. 本适配器不创建公共核心文档。先读取 Qoder 配置并解析 `context.fileName`。
-2. 自定义入口实际存在或确定由所选模块生成时才使用；未配置时，仅在公共 `AGENTS.md` 可用时复用它。
+2. 自定义入口实际存在或确定由所选模块生成时，将其作为薄 P0 入口；未配置时，仅在公共 `AGENTS.md` 可用时复用它。多个 `context.fileName` 不得重复加载同一事实源。
 3. 自定义入口与 `AGENTS.md` 均不可用时，跳过 Qoder 项目规则入口，不影响独立工具模块初始化。
 4. 已有 `AGENTS.local.md` 时读取并检查，只允许保存本机差异；若 soul 不可用，则仅检查它不复制现有公共事实。新建该文件必须由用户明确要求，并加入 `.gitignore`。
-5. 仅当用户需要 Qoder 的 Always、Model Decision、Specific Files 或 Manual 触发能力时，才生成 `.qoder/rules/` 文件。
-6. Qoder 专属规则只写触发元数据和差异内容，只能引用 `available_artifacts`。
+5. 仅当用户需要且当前 Qoder 版本确认支持 Always、Model Decision、Specific Files 或 Manual 触发时，才生成 `.qoder/rules/` 文件：Always 只放最小 P0 差异，条件触发用于 P1，P2 仍按需读取。
+6. Qoder 专属规则只写触发元数据和差异内容，只能引用 `available_artifacts`；不得重复公共入口已自动加载的内容。
 7. 如用户使用 Qoder CN/Lingma 变体，不假设目录相同，必须询问实际自动加载目录；可能为 `.lingma/rules/`。
 
 ## 兼容边界

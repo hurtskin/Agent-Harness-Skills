@@ -12,14 +12,13 @@ OpenCode 优先读取项目 `AGENTS.md`；缺失时可回退到 `CLAUDE.md`。�
 
 ## 生成策略
 
-1. 本适配器不创建公共文档。项目 `AGENTS.md` 已存在或本次将生成时，直接复用；不存在时不把它当作有效入口。
-2. 只有 `available_artifacts` 中存在额外规则且用户确认需要显式加载时，才升级已有 `opencode.json/jsonc` 的 `instructions`。
-3. `instructions` 只加入实际存在或确定将生成的 `.trae/rules/soul.md`、`.trae/rules/lessons-learned.md` 等规则文件。
-4. 不把 `AGENTS.md` 再加入 `instructions`，避免与 OpenCode 原生加载重复。
-5. `决策日志.md` 或 `排期清单.md` 实际可用时，只能在 OpenCode 实际采用的 Markdown 入口中将其列为按需读取目标；不得把说明写入 `instructions` 字段，也不得全文自动加载。没有可用 Markdown 入口时跳过该说明。
-6. `AGENTS.md` 和可用 instructions 均不存在时，允许本次不生成 OpenCode 项目规则入口，只初始化用户选择的独立工具模块。
-7. 选择 changelog-rag 时，使用 `templates/config/opencode-changelog-rag.json.template`：将 `mcp.changelog-rag` 增量合并到项目根已有的 `opencode.json` 或 `opencode.jsonc`，两者均不存在时创建 `opencode.json`；替换项目根和已确认数据源占位符，不得覆盖其他配置。
-8. 已有 `AGENTS.md` 时不要依赖 `CLAUDE.md` 回退。
+1. 本适配器不创建公共文档。项目 `AGENTS.md` 已存在或本次将生成时，将其作为原生 P0 短入口；不存在时不把它当作有效入口。
+2. 只有 `available_artifacts` 中存在额外 P0/P1 规则、OpenCode `instructions` 能力已由现有配置或用户确认，且不会与原生入口重复时，才增量升级 `opencode.json/jsonc`。
+3. `instructions` 只加入实际存在或确定将生成、且未通过其他路径自动加载的条件规则；不得用它再次加载 `AGENTS.md` 或无条件加载 P2 文件。
+4. `决策日志.md`、lessons 或 `排期清单.md` 实际可用时，只在 OpenCode 实际采用的 Markdown 入口中列为 P1/P2 读取目标；没有可用 Markdown 入口时跳过该说明。
+5. `AGENTS.md` 和可用 instructions 均不存在时，允许本次不生成 OpenCode 项目规则入口，只初始化用户选择的独立工具模块。
+6. 选择 changelog-rag 时，使用 `templates/config/opencode-changelog-rag.json.template`：将 `mcp.changelog-rag` 增量合并到项目根已有的 `opencode.json` 或 `opencode.jsonc`，两者均不存在时创建 `opencode.json`；替换项目根和已确认数据源占位符，不得覆盖其他配置。
+7. 已有 `AGENTS.md` 时不要依赖 `CLAUDE.md` 回退。
 
 ## 兼容边界
 

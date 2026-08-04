@@ -19,6 +19,6 @@ class DriftFinding:
 
     detector: str  # e.g., "D1", "D2"
     severity: Severity
-    spec_id: str  # e.g., "spec-00-arch/sub-01-platform"
+    spec_path: str
     message: str
-    details: dict[str, str] = field(default_factory=dict)
+    evidence: dict[str, object] = field(default_factory=dict)

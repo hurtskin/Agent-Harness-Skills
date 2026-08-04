@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from drift_check.adapters.asset_radar import AssetRadarAdapter
+from drift_check.adapters.base import SpecAdapter
 from drift_check.detectors.common import DriftFinding, Severity
 
 
@@ -53,7 +53,7 @@ def _relative(path: Path, root: Path) -> str:
         return path.name
 
 
-def _collect_references(adapter: AssetRadarAdapter) -> dict[str, list[str]]:
+def _collect_references(adapter: SpecAdapter) -> dict[str, list[str]]:
     """Collect every ``§XX`` reference across the project, grouped by id.
 
     Scans (in order):
@@ -101,7 +101,7 @@ def _collect_references(adapter: AssetRadarAdapter) -> dict[str, list[str]]:
     return {ref: sorted(files) for ref, files in grouped.items()}
 
 
-def _collect_alive_anchors(adapter: AssetRadarAdapter) -> set[str]:
+def _collect_alive_anchors(adapter: SpecAdapter) -> set[str]:
     """Read lessons-learned.md and return the set of ``§XX`` anchors defined.
 
     An anchor is a line of the form ``## §XX`` (XX = digits + optional
@@ -115,7 +115,7 @@ def _collect_alive_anchors(adapter: AssetRadarAdapter) -> set[str]:
     return set(_ANCHOR_RE.findall(text))
 
 
-def detect(adapter: AssetRadarAdapter) -> list[DriftFinding]:
+def detect(adapter: SpecAdapter) -> list[DriftFinding]:
     """Detect dangling ``§XX`` references with no lessons-learned.md anchor.
 
     Algorithm:

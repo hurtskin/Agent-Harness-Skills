@@ -2,59 +2,46 @@
 
 from __future__ import annotations
 
-import re
-
-from drift_check.adapters.base import SpecAdapter
+from drift_check.adapters.base import SpecAdapter, SpecLocation
 from drift_check.detectors.common import DriftFinding, Severity
 
 
-def detect_version_drift(adapter: SpecAdapter) -> list[DriftFinding]:
-    """Check that spec.md / tasks.md / checklist.md have matching versions."""
-    findings: list[DriftFinding] = []
-
-    for spec in adapter.list_specs():
-        spec_v = _extract_version(spec.spec_md.read_text(encoding="utf-8"))
-        tasks_v = _extract_version(spec.tasks_md.read_text(encoding="utf-8"))
-        checklist_v = _extract_version(spec.checklist_md.read_text(encoding="utf-8"))
-
-        if spec_v is None:
-            findings.append(
-                DriftFinding(
-                    detector="D1",
-                    severity=Severity.ERROR,
-                    spec_id=spec.rel_spec_id,
-                    message="spec.md missing version marker",
-                    details={"file": spec.spec_md.name},
-                )
+def detect(spec: SpecLocation, adapter: SpecAdapter) -> list[DriftFinding]:
+    """Check that one spec.md / tasks.md / checklist.md set has matching versions."""
+    versions = {
+        "spec": adapter.parse_version(spec.spec_md.read_text(encoding="utf-8")),
+        "tasks": adapter.parse_version(spec.tasks_md.read_text(encoding="utf-8")),
+        "checklist": adapter.parse_version(spec.checklist_md.read_text(encoding="utf-8")),
+    }
+    unknown_files = [f"{name}.md" for name, version in versions.items() if version == "unknown"]
+    if unknown_files:
+        return [
+            DriftFinding(
+                detector="D1",
+                severity=Severity.WARNING,
+                spec_path=spec.rel_spec_id,
+                message=f"version unknown in: {', '.join(unknown_files)}",
+                evidence={
+                    "kind": "version_unknown",
+                    "files": unknown_files,
+                    "versions": versions,
+                },
             )
-            continue
+        ]
 
-        if tasks_v != spec_v:
-            findings.append(
-                DriftFinding(
-                    detector="D1",
-                    severity=Severity.ERROR,
-                    spec_id=spec.rel_spec_id,
-                    message="tasks.md version mismatch",
-                    details={"spec": spec_v or "unknown", "tasks": tasks_v or "unknown"},
-                )
-            )
+    normalized = {name: version.lower().removeprefix("v") for name, version in versions.items()}
+    if len(set(normalized.values())) == 1:
+        return []
 
-        if checklist_v != spec_v:
-            findings.append(
-                DriftFinding(
-                    detector="D1",
-                    severity=Severity.ERROR,
-                    spec_id=spec.rel_spec_id,
-                    message="checklist.md version mismatch",
-                    details={"spec": spec_v or "unknown", "checklist": checklist_v or "unknown"},
-                )
-            )
-
-    return findings
-
-
-def _extract_version(md_text: str) -> str | None:
-    """Extract version from markdown header (e.g., '**版本:** v1.0.0')."""
-    m = re.search(r"\*\*版本[:：]\*\*\s*v?(\d+\.\d+\.\d+)", md_text)
-    return m.group(1) if m else None
+    return [
+        DriftFinding(
+            detector="D1",
+            severity=Severity.ERROR,
+            spec_path=spec.rel_spec_id,
+            message=(
+                f"version mismatch: spec={versions['spec']} tasks={versions['tasks']} "
+                f"checklist={versions['checklist']}"
+            ),
+            evidence={"kind": "version_mismatch", "versions": versions},
+        )
+    ]

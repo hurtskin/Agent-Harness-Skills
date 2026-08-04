@@ -23,7 +23,8 @@
 │   │   ├── workflows/
 │   │   └── templates/
 │   └── task-handoff/
-│       └── SKILL.md
+│       ├── SKILL.md
+│       └── README.md
 ```
 
 ## 发布约定

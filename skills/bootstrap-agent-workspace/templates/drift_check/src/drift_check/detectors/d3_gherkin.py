@@ -2,56 +2,54 @@
 
 from __future__ import annotations
 
-from drift_check.adapters.base import SpecAdapter
+import ast
+import re
+
+from drift_check.adapters.base import SpecAdapter, SpecLocation
 from drift_check.detectors.common import DriftFinding, Severity
 
 
-def detect_gherkin_drift(adapter: SpecAdapter) -> list[DriftFinding]:
-    """Check that Gherkin scenario count matches test case count."""
-    findings: list[DriftFinding] = []
+def _count_tests(spec: SpecLocation) -> int:
+    test_dir = spec.spec_dir / "tests"
+    if not test_dir.exists():
+        return 0
+    count = 0
+    for path in test_dir.glob("test_*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        count += sum(
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name.startswith("test_")
+            for node in ast.walk(tree)
+        )
+    return count
 
-    for spec in adapter.list_specs():
-        spec_text = spec.spec_md.read_text(encoding="utf-8")
-        gherkin_count = adapter.parse_gherkin_count(spec_text)
-        if gherkin_count == 0:
-            continue
 
-        # Count TC-XX markers in spec
-        import re
-        tc_count = len(re.findall(r"TC-[A-Za-z0-9-]+", spec_text))
-
-        # Count test files in spec directory
-        test_dir = spec.spec_dir / "tests"
-        test_file_count = 0
-        if test_dir.exists():
-            test_file_count = len(list(test_dir.glob("test_*.py")))
-
-        if gherkin_count != tc_count:
-            findings.append(
-                DriftFinding(
-                    detector="D3",
-                    severity=Severity.ERROR,
-                    spec_id=spec.rel_spec_id,
-                    message="Gherkin scenario count != TC marker count",
-                    details={
-                        "gherkin": str(gherkin_count),
-                        "tc_markers": str(tc_count),
-                    },
-                )
-            )
-
-        if test_file_count > 0 and gherkin_count != test_file_count:
-            findings.append(
-                DriftFinding(
-                    detector="D3",
-                    severity=Severity.WARNING,
-                    spec_id=spec.rel_spec_id,
-                    message="Gherkin scenario count != test file count",
-                    details={
-                        "gherkin": str(gherkin_count),
-                        "test_files": str(test_file_count),
-                    },
-                )
-            )
-
-    return findings
+def detect(spec: SpecLocation, adapter: SpecAdapter) -> list[DriftFinding]:
+    """Check Gherkin scenarios, task TC markers, and co-located test functions."""
+    spec_text = spec.spec_md.read_text(encoding="utf-8")
+    gherkin = adapter.parse_gherkin_count(spec_text)
+    if gherkin == 0:
+        return []
+    tasks_text = spec.tasks_md.read_text(encoding="utf-8")
+    tc = len(re.findall(r"\bTC-[A-Za-z0-9_-]+", tasks_text))
+    tests = _count_tests(spec)
+    if gherkin == tc and (tests == 0 or tests == gherkin):
+        return []
+    counts = {"gherkin": gherkin, "tc": tc, "tests": tests}
+    return [
+        DriftFinding(
+            detector="D3",
+            severity=Severity.ERROR,
+            spec_path=spec.rel_spec_id,
+            message=f"count mismatch: spec={gherkin} tasks={tc} tests={tests}",
+            evidence={
+                "kind": "count_mismatch",
+                "counts": counts,
+                "deltas": {
+                    "spec_vs_tasks": gherkin - tc,
+                    "tasks_vs_tests": tc - tests,
+                    "spec_vs_tests": gherkin - tests,
+                },
+            },
+        )
+    ]

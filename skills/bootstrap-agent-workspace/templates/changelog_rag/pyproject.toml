@@ -1,7 +1,7 @@
 [project]
 name = "changelog-rag"
 version = "0.1.0"
-description = "Local MCP server for semantic retrieval over AGENTS.md decision changelog"
+description = "Local MCP server for semantic retrieval over 决策日志.md"
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]>=1.0.0",

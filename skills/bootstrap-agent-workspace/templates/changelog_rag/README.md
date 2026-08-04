@@ -1,13 +1,13 @@
 # changelog-rag (template)
 
-> Local MCP server for semantic retrieval over `AGENTS.md` decision changelog.
+> Local MCP server for semantic retrieval over `决策日志.md`.
 > This is the **template** copied by `bootstrap-agent-workspace` skill v3.
-> For the full documentation, see [lessons-learned.md §19 / §20] in the project.
+> For the full documentation, see the workspace documentation.
 
 ## What it does
 
 Two MCP tools (over stdio) let an agent pull only the decision-log entries relevant
-to the current task, instead of reading the entire `AGENTS.md`:
+to the current task, instead of reading the entire `决策日志.md`:
 
 | Tool | Purpose |
 |---|---|

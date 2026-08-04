@@ -12,12 +12,13 @@ Pi 在启动时加载 `AGENTS.md`，来源包括 `~/.pi/agent/`、当前目录�
 
 ## 生成策略
 
-1. 本适配器不创建公共 `AGENTS.md`；仅在它已存在或本次核心流程将生成时复用。
-2. 核心文档未选择且项目 `AGENTS.md` 不存在时，跳过 Pi 项目规则入口，不影响独立工具模块初始化。
-3. 除非用户明确要求替换 Pi 默认系统提示，否则不生成 `.pi/SYSTEM.md`。
-4. 用户明确需要追加 Pi 专属系统提示时，优先使用 `.pi/APPEND_SYSTEM.md`；若当前版本不支持自动发现，则使用 `--append-system-prompt` 显式加载。
-5. 系统提示文件只写 Pi 专属行为，并且只引用 `available_artifacts` 中的文件，不复制公共规则。
-6. Pi Skills、扩展和 Prompt Templates 属于可选增强，不在工作区初始化时自动安装。
+1. 本适配器不创建公共 `AGENTS.md`；仅在它已存在或本次核心流程将生成时，将其作为 Pi 的 P0 短入口复用。
+2. AGENTS 仅索引 P1/P2 文件；决策日志和 lessons 不写入 `.pi/SYSTEM.md` 或 `.pi/APPEND_SYSTEM.md`，也不默认全文加载。
+3. 核心文档未选择且项目 `AGENTS.md` 不存在时，跳过 Pi 项目规则入口，不影响独立工具模块初始化。
+4. 除非用户明确要求替换 Pi 默认系统提示，否则不生成 `.pi/SYSTEM.md`。
+5. 用户明确需要追加 Pi 专属系统提示，且当前版本能力得到确认时，才使用 `.pi/APPEND_SYSTEM.md` 或 `--append-system-prompt`；不得假设自动发现。
+6. 系统提示文件只写 Pi 专属最小 P0 差异，并且只引用 `available_artifacts` 中的文件，不复制公共规则。
+7. Pi Skills、扩展和 Prompt Templates 属于可选增强，不在工作区初始化时自动安装。
 
 ## 兼容边界
 

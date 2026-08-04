@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import re
 
-from drift_check.adapters.asset_radar import AssetRadarAdapter
-from drift_check.adapters.base import SpecLocation
+from drift_check.adapters.base import SpecAdapter, SpecLocation
 from drift_check.detectors.common import DriftFinding, Severity
 
 
@@ -54,7 +53,7 @@ def _is_doc_task(task_id: str, tasks_md_text: str) -> bool:
 
 def detect(
     spec: SpecLocation,
-    adapter: AssetRadarAdapter,
+    adapter: SpecAdapter,
 ) -> list[DriftFinding]:
     """Detect drift between tasks.md task states and actual code presence.
 

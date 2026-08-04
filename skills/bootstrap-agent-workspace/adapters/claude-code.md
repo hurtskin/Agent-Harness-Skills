@@ -13,11 +13,11 @@ Claude Code 使用项目 `CLAUDE.md` 或 `.claude/CLAUDE.md`，并支持 `.claud
 
 1. 本适配器只处理 Claude 原生入口，不创建任何公共核心文档。
 2. 仅当 `available_artifacts` 中至少存在一个需要 Claude 自动加载的公共文件时，才生成或升级 `CLAUDE.md`。
-3. 入口只导入实际位于 `available_artifacts` 的文件：
-   - 有 `AGENTS.md` 才加入对应 `@` 导入。
-   - 有 `.trae/rules/soul.md` 或 `.trae/rules/lessons-learned.md` 才分别导入。
-   - 有 `决策日志.md` 或已选择 changelog-rag 时，才写历史决策按需查询说明。
-   - 有 `排期清单.md` 才写排期提示。
+3. 将 `CLAUDE.md` 作为薄 P0 入口：
+   - 有 `AGENTS.md` 时只加入对应 `@` 导入，以复用其短导航。
+   - 仅当 soul 未被另一条 Claude 自动加载路径覆盖且确需常驻时，才导入 `.trae/rules/soul.md`。
+   - 不直接导入 `.trae/rules/lessons-learned.md`、`决策日志.md` 或 `排期清单.md`；在入口中列为 P1/P2 路径与读取条件。
+   - `.claude/rules/*.md` 仅承载 Claude 专属或路径条件规则，不重复导入 `AGENTS.md` 已提供的事实。
 4. 若没有可用公共文件，不新建空壳 `CLAUDE.md`；已有入口默认保留，不追加失效引用。
 5. 如项目已有 `.claude/CLAUDE.md`，先询问保留该位置还是迁移到根目录，不得同时维护两份不同入口。
 6. 相对导入按入口所在目录计算：根 `CLAUDE.md` 使用 `@AGENTS.md`；`.claude/CLAUDE.md` 使用 `@../AGENTS.md`，其他路径同理增加 `../`。

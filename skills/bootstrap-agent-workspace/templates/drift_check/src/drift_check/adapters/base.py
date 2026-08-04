@@ -30,12 +30,14 @@ class CodeTarget:
 
 @dataclass(frozen=True)
 class FieldSpec:
-    """A field parsed from a spec markdown table."""
+    """A field or class entry parsed from a spec markdown table."""
 
     name: str
-    type: str
+    field_type: str
     required: bool
     default: str | None = None
+    source_section: str = ""
+    code_map: str = ""
 
 
 @dataclass(frozen=True)
@@ -45,6 +47,15 @@ class TaskState:
     task_id: str  # e.g., "T-sub01-01"
     state: str  # "done" | "pending" | "in_progress"
     code_target: CodeTarget | None = None
+
+
+@dataclass(frozen=True)
+class ChangelogRow:
+    """A row parsed from a spec changelog table."""
+
+    version: str
+    date: str
+    summary: str
 
 
 @dataclass(frozen=True)
@@ -60,6 +71,10 @@ class BugSpec:
 class SpecAdapter(Protocol):
     """Protocol for project-specific spec adapters."""
 
+    def project_name(self) -> str:
+        """Return the project name."""
+        ...
+
     def project_root(self) -> Path:
         """Return the project root directory."""
         ...
@@ -70,6 +85,10 @@ class SpecAdapter(Protocol):
 
     def list_code_targets(self) -> list[CodeTarget]:
         """List all code files that specs may target."""
+        ...
+
+    def parse_version(self, md_text: str) -> str:
+        """Extract a version marker from markdown, or ``unknown``."""
         ...
 
     def parse_field_table(self, md_text: str) -> list[FieldSpec]:
@@ -84,7 +103,12 @@ class SpecAdapter(Protocol):
         """Parse tasks.md into TaskState list."""
         ...
 
-    def parse_task_code_target(self, task_id: str, tasks_md: str) -> CodeTarget | None:
+    def parse_task_code_target(
+        self,
+        task_id: str,
+        tasks_md: str,
+        spec_md_path: Path | None = None,
+    ) -> CodeTarget | None:
         """Resolve a task id to the code file it describes."""
         ...
 
@@ -100,6 +124,10 @@ class SpecAdapter(Protocol):
         """Return path to decision log file, or None if not found."""
         ...
 
+    def historical_lesson_anchors(self) -> set[str]:
+        """Return lesson anchors intentionally retained as historical references."""
+        ...
+
     def list_bug_specs(self) -> list[BugSpec]:
         """List all bug sub-specs."""
         ...
@@ -108,6 +136,6 @@ class SpecAdapter(Protocol):
         """Parse parent spec id from bug slug (e.g., 'sub-03' -> 'spec-00-arch')."""
         ...
 
-    def parse_changelog_table(self, spec_md_text: str) -> list[dict]:
+    def parse_changelog_table(self, spec_md_text: str) -> list[ChangelogRow]:
         """Parse §9.5 changelog table from spec.md."""
         ...

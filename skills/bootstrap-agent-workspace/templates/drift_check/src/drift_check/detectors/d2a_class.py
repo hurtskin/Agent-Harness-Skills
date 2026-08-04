@@ -76,7 +76,7 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from drift_check.adapters.asset_radar import FieldSpec
+from drift_check.adapters.base import FieldSpec
 from drift_check.detectors.common import DriftFinding, Severity
 
 

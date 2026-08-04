@@ -15,9 +15,9 @@ Codex 使用 `AGENTS.md`，并支持目录级 `AGENTS.md` 与 `AGENTS.override.m
 ## 生成策略
 
 1. 本适配器不创建公共 `AGENTS.md`；仅当它已存在或本次选择核心工作区文档将生成时，才将其作为 Codex 入口。
-2. 只有可用的 `AGENTS.md` 缺少启动索引时才升级，并且索引只指向 `available_artifacts` 中的 soul、lessons、Spec、决策或排期。
+2. 可用的 `AGENTS.md` 是 P0 短入口，只索引 `available_artifacts` 中的 P1/P2 soul、lessons、Spec、决策或排期路径；不得因适配 Codex 扩写其正文。
 3. 核心文档未选择且 `AGENTS.md` 不存在时，跳过 Codex 项目规则入口；这不影响 changelog-rag 等独立工具模块初始化。
-4. 只有子目录确有不同约束且公共 `AGENTS.md` 可用时，才生成嵌套 `AGENTS.md`。
+4. Codex 的目录级 `AGENTS.md` 仅在确有局部差异且公共入口可用时生成，承载对应目录的最小 P0/P1 差异，不复制根入口或历史。
 5. 只有需要替换同目录规则时才使用 `AGENTS.override.md`，并要求用户确认；不得用 override 补造缺失的公共事实。
 
 ## 兼容边界

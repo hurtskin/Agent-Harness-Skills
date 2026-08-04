@@ -6,14 +6,14 @@ from pathlib import Path
 
 import click
 
-from drift_check.adapters.base import SpecAdapter
+from drift_check.adapters.asset_radar import AssetRadarAdapter
 from drift_check.detectors.common import DriftFinding, Severity
-from drift_check.detectors.d1_version import detect_version_drift
-from drift_check.detectors.d2_field import detect_field_drift
-from drift_check.detectors.d3_gherkin import detect_gherkin_drift
-from drift_check.detectors.d4_task_state import detect_task_state_drift
-from drift_check.detectors.d5_lesson_ref import detect_lesson_ref_drift
-from drift_check.detectors.d6_bug_sync import detect_bug_sync_drift
+from drift_check.detectors.d1_version import detect as detect_d1
+from drift_check.detectors.d2_field import detect as detect_d2
+from drift_check.detectors.d3_gherkin import detect as detect_d3
+from drift_check.detectors.d4_task_state import detect as detect_d4
+from drift_check.detectors.d5_lesson_ref import detect as detect_d5
+from drift_check.detectors.d6_bug_sync import detect as detect_d6
 
 
 @click.group()
@@ -27,36 +27,38 @@ def main() -> None:
 @click.option("--only", multiple=True, help="Run only specific detectors (e.g., --only D1 --only D4)")
 def scan(project_root: Path, fmt: str, only: tuple[str, ...]) -> None:
     """Scan project for spec <-> code drift."""
-    # Import adapter dynamically based on project
-    # For now, use a generic adapter that works with .trae/specs/ layout
-    from drift_check.adapters.template import TemplateAdapter
+    adapter = AssetRadarAdapter(project_root)
 
-    adapter = TemplateAdapter(project_root)
-
-    detectors = {
-        "D1": detect_version_drift,
-        "D2": detect_field_drift,
-        "D3": detect_gherkin_drift,
-        "D4": detect_task_state_drift,
-        "D5": detect_lesson_ref_drift,
-        "D6": detect_bug_sync_drift,
-    }
-
-    if only:
-        detectors = {k: v for k, v in detectors.items() if k in only}
-
+    selected = set(only) if only else {"D1", "D2", "D3", "D4", "D5", "D6"}
     findings: list[DriftFinding] = []
-    for detector_fn in detectors.values():
-        findings.extend(detector_fn(adapter))
+    specs = adapter.list_specs()
+    if "D1" in selected:
+        for spec in specs:
+            findings.extend(detect_d1(spec, adapter))
+    if "D2" in selected:
+        code_targets = adapter.list_code_targets()
+        for spec in specs:
+            for target in code_targets:
+                findings.extend(detect_d2(spec, target, adapter))
+    if "D3" in selected:
+        for spec in specs:
+            findings.extend(detect_d3(spec, adapter))
+    if "D4" in selected:
+        for spec in specs:
+            findings.extend(detect_d4(spec, adapter))
+    if "D5" in selected:
+        findings.extend(detect_d5(adapter))
+    if "D6" in selected:
+        findings.extend(detect_d6(adapter))
 
     if fmt == "json":
         output = [
             {
                 "detector": f.detector,
                 "severity": f.severity.value,
-                "spec_id": f.spec_id,
+                "spec_path": f.spec_path,
                 "message": f.message,
-                "details": f.details,
+                "evidence": f.evidence,
             }
             for f in findings
         ]
@@ -68,8 +70,8 @@ def scan(project_root: Path, fmt: str, only: tuple[str, ...]) -> None:
         for f in findings:
             sev_icon = "ERROR" if f.severity == Severity.ERROR else "WARN"
             click.echo(f"[{sev_icon}] {f.detector}: {f.message}")
-            if f.details:
-                for k, v in f.details.items():
+            if f.evidence:
+                for k, v in f.evidence.items():
                     click.echo(f"      {k}: {v}")
 
     has_error = any(f.severity == Severity.ERROR for f in findings)
