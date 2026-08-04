@@ -18,22 +18,24 @@ for your project's spec layout (e.g., `.trae/specs/*`, `docs/specs/*`).
 
 ## Install
 
+This package is a member of the shared `tools/` uv workspace. Run from `tools/`:
+
 ```bash
-cd tools/drift_check
-uv sync --extra dev
+cd tools
+uv sync --all-packages --all-extras
 ```
 
 ## CLI
 
 ```bash
-# Scan project root, default text format
-uv run drift-check scan --project-root .
+# Scan project root from the tools directory
+uv run drift-check scan --project-root ..
 
 # JSON output (machine-readable)
-uv run drift-check scan --project-root . --format json
+uv run drift-check scan --project-root .. --format json
 
 # Run only specific detectors (repeatable)
-uv run drift-check scan --project-root . --only D1 --only D4
+uv run drift-check scan --project-root .. --only D1 --only D4
 
 # List available detectors
 uv run drift-check list-detectors

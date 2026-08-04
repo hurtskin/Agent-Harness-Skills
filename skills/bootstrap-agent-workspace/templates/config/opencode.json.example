@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "changelog-rag": {
+      "type": "local",
+      "command": [
+        "uv",
+        "--directory",
+        "C:/path/to/your-project/tools",
+        "run",
+        "python",
+        "-m",
+        "changelog_rag.server"
+      ],
+      "enabled": true,
+      "environment": {
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "CHANGELOG_RAG_AGENTS_MD": "C:/path/to/your-project/决策日志.md"
+      }
+    }
+  }
+}

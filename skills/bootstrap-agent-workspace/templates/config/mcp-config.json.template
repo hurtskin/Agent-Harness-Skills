@@ -4,7 +4,7 @@
       "command": "uv",
       "args": [
         "--directory",
-        "<PROJECT_ROOT>/tools/changelog_rag",
+        "<PROJECT_ROOT>/tools",
         "run",
         "python",
         "-m",

@@ -16,11 +16,13 @@ to the current task, instead of reading the entire `AGENTS.md`:
 
 ## Setup (after skill copies this template)
 
+This package is a member of the shared `tools/` uv workspace. Run all environment commands from `tools/`; do not create a package-local `.venv` or `uv.lock`.
+
 ```bash
-cd tools/changelog_rag
-uv sync --extra dev                # install mcp, sentence-transformers, numpy + dev deps
+cd tools
+uv sync --all-packages --all-extras
 uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-small-en-v1.5')"
-uv run pytest tests/                # should be 15/15 PASS
+uv run pytest changelog_rag/tests/
 ```
 
 ## Wire into your IDE
