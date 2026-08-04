@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import shutil
 import tempfile
 import unittest
@@ -57,6 +58,26 @@ class SelfCheckTests(unittest.TestCase):
         errors = self_check.check_fact_sources(root)
 
         self.assertTrue(any("SKILL.md" in error for error in errors))
+
+    def test_configure_output_encoding_uses_utf8(self) -> None:
+        class ConfigurableStream(io.StringIO):
+            configured: tuple[str, str] | None = None
+
+            def reconfigure(self, *, encoding: str, errors: str) -> None:
+                self.configured = (encoding, errors)
+
+        stdout = ConfigurableStream()
+        stderr = ConfigurableStream()
+        original_stdout, original_stderr = self_check.sys.stdout, self_check.sys.stderr
+        self.addCleanup(setattr, self_check.sys, "stdout", original_stdout)
+        self.addCleanup(setattr, self_check.sys, "stderr", original_stderr)
+        self_check.sys.stdout = stdout
+        self_check.sys.stderr = stderr
+
+        self_check.configure_output_encoding()
+
+        self.assertEqual(("utf-8", "backslashreplace"), stdout.configured)
+        self.assertEqual(("utf-8", "backslashreplace"), stderr.configured)
 
     def test_changelog_agents_md_description_is_reported(self) -> None:
         temporary, root = self.copy_skill()

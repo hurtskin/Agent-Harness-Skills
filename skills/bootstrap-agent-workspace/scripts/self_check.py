@@ -175,7 +175,17 @@ def validate(root: Path) -> list[str]:
     return errors
 
 
+def configure_output_encoding() -> None:
+    """Use UTF-8 for Chinese diagnostics on Windows and CI consoles."""
+    for stream_name in ("stdout", "stderr"):
+        stream = getattr(sys, stream_name)
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="backslashreplace")
+
+
 def main(argv: list[str] | None = None) -> int:
+    configure_output_encoding()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=SKILL_ROOT, help="Skill 根目录")
     args = parser.parse_args(argv)
