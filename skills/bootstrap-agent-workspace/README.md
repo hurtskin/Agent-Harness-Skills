@@ -39,24 +39,38 @@
 SKILL.md
 ├── COMMON.md
 ├── adapters/<当前客户端>.md
-├── workflows/core-documents.md      仅选择核心文档时
-├── modules/kanban.md                仅选择排期时
-├── modules/changelog-rag.md         仅选择 changelog-rag 时
-├── modules/drift-check.md           仅选择 drift-check 时
-├── modules/python-workspace.md      选择任一 Python 工具时
-└── workflows/verification.md        最后按选择范围验收
+├── 首屏按目的选择场景套餐
+│   ├── 快速开始（推荐）
+│   ├── 规范治理（适合长期项目）
+│   ├── 完整工具链（适合大型协作）
+│   └── 自定义能力 → 再显示技术模块多选
+├── workflows/core-documents.md      套餐映射或自定义选中核心文档时
+├── modules/kanban.md                套餐映射或自定义选中排期时
+├── modules/changelog-rag.md         套餐映射或自定义选中 changelog-rag 时
+├── modules/drift-check.md           套餐映射或自定义选中 drift-check 时
+├── modules/python-workspace.md      选中任一 Python 工具时
+└── workflows/verification.md        最后按确认范围验收
 ```
 
-启动时 Skill 会一次询问本次需要哪些能力：
+首次引导先询问用户想达到什么效果，首屏不要求理解 changelog、RAG、drift 等术语：
 
-1. 核心工作区文档（推荐）
-2. 排期清单
-3. changelog-rag 决策检索
-4. drift-check 漂移检查
+1. **快速开始（推荐）**：建立项目协作说明和待办排期，马上开始推进工作。
+2. **规范治理（适合长期项目）**：在快速开始基础上，让重要历史决定之后能快速查到。
+3. **完整工具链（适合大型协作）**：在规范治理基础上，持续检查规范、任务和代码是否一致。此项仅适合已有 Spec / 文档驱动协作的项目，不是普通小项目的默认选择。
+4. **自定义能力**：自行组合具体能力，此时才显示原有技术模块多选。
 
-确认前会汇报将加载的文档和将生成的产物。未选择的模块不会参与执行。
+确认前会汇报所选套餐、对应技术模块、将加载的文档和将生成的产物；完整工具链会再次提示一致性检查的适用前提。未选择的模块不会参与执行。
 
-## 模块与产物
+## 套餐映射与模块产物
+
+| 场景套餐 | 技术模块 |
+|---|---|
+| 快速开始（推荐） | 核心工作区文档 + 排期清单 |
+| 规范治理（适合长期项目） | 核心工作区文档 + 排期清单 + changelog-rag |
+| 完整工具链（适合大型协作） | 核心工作区文档 + 排期清单 + changelog-rag + drift-check |
+| 自定义能力 | 进入核心工作区文档、排期清单、changelog-rag、drift-check 原有多选 |
+
+技术模块名在确认清单或自定义入口中展示。`drift-check` 仅适用于已有 Spec / 文档驱动协作、需要持续检查文档与实现一致性的项目，避免将完整工具链误导为普通小项目的默认方案。
 
 | 选择 | 加载文档 | 主要产物 |
 |---|---|---|
