@@ -34,24 +34,6 @@ from changelog_rag.core import (
 )
 
 
-def pytest_addoption(parser: pytest.Parser) -> None:
-    parser.addoption(
-        "--run-slow",
-        action="store_true",
-        default=False,
-        help="Run slow tests that require loading the embedding model",
-    )
-
-
-def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
-    if config.getoption("--run-slow"):
-        return
-    skip_slow = pytest.mark.skip(reason="needs --run-slow (loads embedding model, ~10s)")
-    for item in items:
-        if "slow" in item.keywords:
-            item.add_marker(skip_slow)
-
-
 slow = pytest.mark.slow
 
 
@@ -209,16 +191,25 @@ def test_index_handles_empty_changelog_gracefully(tmp_path: Path) -> None:
     assert idx.search(keywords=["anything"], limit=5) == []
 
 
-# --- regression: real AGENTS.md from this repo (FAST — parser only) ---
+# --- regression: real 决策日志.md from this repo (FAST — parser only) ---
 
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+def _find_repo_decision_log(start: Path) -> Path | None:
+    for directory in (start, *start.parents):
+        candidate = directory / "决策日志.md"
+        if candidate.is_file():
+            return candidate
+    return None
 
 
-@pytest.mark.skipif(not (REPO_ROOT / "AGENTS.md").exists(), reason="no AGENTS.md")
-def test_real_agents_md_parses_cleanly() -> None:
-    """Regression: real AGENTS.md (after v8 indexed-style rewrite) must parse with zero crashes."""
-    entries = parse_changelog(REPO_ROOT / "AGENTS.md")
+REAL_DECISION_LOG = _find_repo_decision_log(Path(__file__).resolve().parent)
+
+
+@pytest.mark.skipif(REAL_DECISION_LOG is None, reason="no repository 决策日志.md")
+def test_real_decision_log_parses_cleanly() -> None:
+    """Regression: the repository 决策日志.md must parse with zero crashes."""
+    assert REAL_DECISION_LOG is not None
+    entries = parse_changelog(REAL_DECISION_LOG)
     assert len(entries) >= 1
     for e in entries:
         assert e.version > 0
@@ -268,6 +259,7 @@ def test_parser_does_not_treat_vN_headers_as_h2_boundary(tmp_path: Path) -> None
     assert [e.version for e in entries] == [1, 2, 3, 10, 20]
 
 
+@slow
 def test_list_recent_returns_newest_first_real_order(tmp_path: Path) -> None:
     """v22 bug regression: list_recent should return newest-first (descending)."""
     p = tmp_path / "AGENTS.md"

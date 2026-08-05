@@ -1,1 +1,8 @@
 push.sh
+tools/.venv/
+**/__pycache__/
+.pytest_cache/
+决策日志.md
+排期清单.md
+.trae/
+tools/
