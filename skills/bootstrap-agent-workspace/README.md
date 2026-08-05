@@ -130,6 +130,63 @@ SKILL.md
 
 同一项目可以同时启用多个适配器，但仍共享上述公共事实源。只有 `AGENTS.md` 已存在或本次将生成时，才向其中写入“Agent 工具适配”表；否则只在执行结果中报告适配状态。
 
+### 新增适配器
+
+新增正式支持的 Hermes 工具时，以 [`adapters/adapter-template.example.md`](adapters/adapter-template.example.md) 为结构起点。该文件只是示例，不参与运行时路由，也不要直接加入正式适配器注册表。
+
+#### 1. 先确认客户端能力
+
+在编写适配器前，基于官方文档、本地配置或运行时证据确认：
+
+- 准确产品名、版本和专属检测信号；只有通用 `AGENTS.md` 时不得反推具体工具。
+- 自动加载文件或目录、继承/覆盖优先级，以及是否支持 Markdown 引用。
+- 是否支持条件规则、MCP 和结构化配置；能力不明时必须询问，不得猜测。
+
+#### 2. 创建适配器文件
+
+复制示例为 `adapters/<tool-slug>.md`，删除占位说明并填写真实行为。正式适配器至少保留以下二级章节：
+
+- `检测信号`
+- `官方入口` 或 `自动加载入口`
+- `生成策略`
+- `校验`
+
+推荐同时保留 `定位` 和 `兼容边界`。即使客户端没有统一入口，也应在“官方入口”中说明必须依据运行时证据或用户确认，不要省略章节或增加按工具名判断的自检特例。
+
+生成策略必须遵守 `available_artifacts` 门禁：适配器只处理客户端原生入口和配置，不自行创建公共核心文档；P0 保持精简，P1 只索引或条件加载，P2 不进入无条件自动加载链；同一事实源只保留一条默认自动加载路径。
+
+#### 3. 注册正式支持
+
+新增文件本身不会自动注册。必须同步更新：
+
+1. `SKILL.md` frontmatter 中的支持工具描述和“工具适配器索引”。
+2. 本 README 的支持工具说明、适配器表和目录树。
+3. 仓库根 `README.md` 中 `bootstrap-agent-workspace` 的支持工具描述。
+4. `scripts/self_check.py` 的 `ADAPTERS` 元组，使缺失文件和章节结构进入自检。
+5. `tests/test_self_check.py`，至少覆盖缺失适配器、缺失必备章节和未注册孤儿文件。
+
+#### 4. 按需增加配置模板
+
+仅复用 `AGENTS.md` 或 Markdown 薄入口时，不需要配置模板。只有客户端具有稳定原生格式且本 Skill 承诺生成 MCP 或机器配置时，才新增 `templates/config/<tool>-*.template`，并同步：
+
+- `modules/changelog-rag.md` 中的客户端生成分支；
+- `workflows/verification.md` 中的格式和合并验收；
+- `scripts/self_check.py` 的 `REQUIRED_FILES`；
+- README 配置说明和对应自动测试。
+
+修改已有配置必须增量合并，保留未知字段、注释和原有格式。changelog-rag 数据源默认指向 `决策日志.md`，并通过共享 `tools/` workspace 启动。
+
+#### 5. 验证
+
+在仓库根目录执行：
+
+```powershell
+uv run --no-project python skills/bootstrap-agent-workspace/scripts/self_check.py
+uv run --no-project python -m unittest discover -s skills/bootstrap-agent-workspace/tests -v
+```
+
+如增加了客户端配置模板，再验证模板语法、占位符、数据源路径和增量合并结果；如增加可执行实现，将对应测试加入 CI。
+
 ## 共享 Python Workspace
 
 changelog-rag 和 drift-check 使用同一个 uv workspace：
@@ -214,6 +271,7 @@ bootstrap-agent-workspace/
 ├── COMMON.md
 ├── README.md
 ├── adapters/
+│   ├── adapter-template.example.md
 │   ├── trae.md
 │   ├── claude-code.md
 │   ├── codex.md
