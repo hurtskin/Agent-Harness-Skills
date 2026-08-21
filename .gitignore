@@ -2,8 +2,10 @@ push.sh
 tools/.venv/
 **/__pycache__/
 .pytest_cache/
+.cursor/
 BACKLOG.md
 .trae/
 tools/
 decisions/
 CHANGELOG.md
+specs/

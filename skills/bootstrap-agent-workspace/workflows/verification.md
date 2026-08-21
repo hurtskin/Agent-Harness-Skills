@@ -39,3 +39,10 @@
 - [ ] Adapter 匹配项目 Spec 布局
 - [ ] 从 `tools/` 执行时 `--project-root ..`
 - [ ] `uv run pytest drift_check/tests` 通过
+
+## 路径成对钩子（选择时）
+
+- [ ] `tools/path_align_hooks/` 含 `drift_lite` 与 `turn_align` 的 `.ps1` / `.sh` 与 README
+- [ ] 独立运行 `drift_lite` 能输出含 `ok` 的 JSON
+- [ ] 未在产物中写入某 Harness 专属 hooks 配置作为「标准答案」
+- [ ] 宿主支持 hook 时：已按当前工具惯例注册 `turn_align`（或在执行结果中说明已跳过注册及原因）

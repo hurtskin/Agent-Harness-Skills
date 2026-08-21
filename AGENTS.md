@@ -18,7 +18,7 @@
 Agent Harness Skills 是面向 Trae 与主流 Agent Harness 的多 Skill 自包含发布仓库。根目录只负责索引；`skills/<name>/` 各自独立发布，不跨 Skill 引入运行时依赖，也不在根目录新增 `SKILL.md`。目标是以按需路由、单一事实源、客户端适配、模板工具和自动校验降低上下文漂移。
 
 - **Scope**：Skill 激活与按需路由、公共事实源治理、客户端适配、模板工具及其自动校验。
-- **Non-goals**：不在根目录发布 Skill；不让一个 Skill 依赖相邻 Skill 或根目录运行时文件；不把本仓库扩展为业务应用或共享运行时框架。
+- **Non-goals**：不在根目录发布 Skill；不让一个 Skill 依赖相邻 Skill 或根目录运行时文件；不把本仓库扩展为业务应用或共享运行时框架；**本发布仓不以 Spec 三件套驱动日常开发**（`specs/` 仅可作本地沙箱，不跟踪入库）。
 - **协作语言**：中文；代码、命令和路径保持原文。
 - **协作模式**：单人。
 
@@ -29,7 +29,7 @@ Agent Harness Skills 是面向 Trae 与主流 Agent Harness 的多 Skill 自包�
 | [`README.md`](README.md) | 仓库索引、发布边界和三个现有 Skill 入口 |
 | [`skills/bootstrap-agent-workspace/SKILL.md`](skills/bootstrap-agent-workspace/SKILL.md) | 工作区初始化激活与模块路由 |
 | [`skills/task-handoff/SKILL.md`](skills/task-handoff/SKILL.md) | 可验证任务交接协议 |
-| [`skills/spec-writing/SKILL.md`](skills/spec-writing/SKILL.md) | Spec 文档编写规范（10 段结构 + 零自由发挥 + 15 题自检） |
+| [`skills/spec-writing/SKILL.md`](skills/spec-writing/SKILL.md) | Spec 文档编写规范（10 段结构 + Properties 推荐 + 零自由发挥 + 15+2 题自检） |
 | [`BACKLOG.md`](BACKLOG.md) | 排期清单：当前未完成工程项；任务开始时按相关性读取 |
 | [`decisions/_INDEX.md`](decisions/_INDEX.md) | 决策索引表；追溯决策时的检索入口 |
 
@@ -44,10 +44,18 @@ uv run --no-project python skills/bootstrap-agent-workspace/scripts/self_check.p
 uv run --no-project python -m unittest discover -s skills/bootstrap-agent-workspace/tests -v
 ```
 
+本仓不把 Hypothesis / `specs/**/pilot` 列入发布验证；Correctness 思想写在 `spec-writing` Skill 内，供消费者项目按变更门选用。
+
 ## 协作原则
 
 - 不猜测；证据不足时先询问。只做满足已确认任务所需的最小改动，不顺手重构。
 - 业务行为、架构、接口或数据模型变更必须文档先行：定位现行 Spec/决策，先展示文档差异并获确认，再严格落代码。
+- **路径成对（L0，stop / drift-lite）**：不看文件内容是否正确，只看本轮 git dirty 是否同时触及「契约侧」与「实现侧」。只改一侧会记 `CODE_WITHOUT_SPEC` 或 `SPEC_WITHOUT_CODE`，默认可能 followup 催补；`PATH_ALIGN_NUDGE=0` / `STOP_ALIGN_FOLLOWUP=0` 可关闭催改。这不是 Correctness/行为证明，只防明显单边漂移。**本发布仓**不跟踪 `specs/`、也不以 Spec 驱动开发——改 `skills/` 文档时不必强行补 `specs/`（可 A2 说明故意单边）；该约定主要服务装了路径成对钩子的**消费者项目**。
+  - **契约侧**（消费者）：`specs/`、路径含 `openapi`、`*.schema.json`
+  - **实现侧**：`skills/` / `src/` / 常见源码后缀（以脚本为准）
+  - **不参与配对**：`.cursor/`、已 gitignore 的沙箱等工具目录；仅改导航文档不触发成对告警
+- **Correctness 变更门**（写给 Skill 消费者）：写 `P-*` 与跑 `PT-*` 分轨；命中相关实现或性质正文才跑对应 PT。本仓不强制、不嵌入全仓 PBT。细则见 `skills/spec-writing/SKILL.md`。
+- **drift-check**：本仓库不默认依赖；bootstrap「完整工具链」默认 = 核心文档 + 排期 + 路径成对；`drift-check` 仅自定义可选（偏 Python）。
 - 优先使用 IDE 的读取、搜索、编辑、删除等专用工具；终端仅用于 Git、依赖、构建和测试。
 - Bug 先报告现象、证据、影响与拟修复范围，得到确认后再修复。
 - 每次会话从本文件获取当前入口；P1 仅在任务命中时读取，P2（`decisions/`）先读 `decisions/_INDEX.md` 按关键词定位，再读对应决策文件，不复制全文。
@@ -73,15 +81,18 @@ uv run --no-project python -m unittest discover -s skills/bootstrap-agent-worksp
 | P1 | `skills/<name>/SKILL.md` 及其按需路由文档 | 修改对应 Skill 或执行其流程时；不得预读未选模块 |
 | P1 | `.github/workflows/bootstrap-agent-workspace.yml` | 修改或核对现有 CI 验证范围时 |
 | P1 | `BACKLOG.md` | 规划任务、判断是否闭环待办时 |
-| P1 | `specs/`（当前无） | 若创建 Spec：`specs/<模块>/<功能>/` 每节点三件套（spec/tasks/checklist），按项目大小裁剪层级；任务命中时读对应节点 |
+| P1 | `specs/`（本仓不跟踪） | 消费者项目 Spec 布局约定仍为 `specs/<模块>/<功能>/` 三件套；本发布仓 `specs/` 已 gitignore，仅本地沙箱可选 |
+| P1 | `.cursor/hooks/`（可选） | 维护宿主本地 hook 接线时；默认不预读。通用脚本在 `tools/path_align_hooks/`（bootstrap 模板） |
 | P2 | `decisions/` | 追溯决策时先读 `decisions/_INDEX.md` 按关键词定位，再读对应决策文件；`ls decisions/` 可浏览全史 |
 | P2 | 归档 Spec（当前无） | 仅在追溯对应历史主题时读取 |
 
 ## 文档职责
 
-- `AGENTS.md`：P0 唯一常驻事实源——短导航、当前入口、协作原则、安全红线、踩坑教训。
+- `AGENTS.md`：P0 唯一常驻事实源——短导航、当前入口、协作原则（含路径成对约定）、安全红线、踩坑教训。
 - `BACKLOG.md`（排期清单）：只保留未完成项；完成即移除，闭环在 decisions/ 新建决策文件并追加 `_INDEX.md` 索引行。
 - `decisions/`：P2 决策目录，一决策一文件（`序号-版本-关键词.md`）；`_INDEX.md` 是唯一索引表。
+- `specs/`：本发布仓**不跟踪**；消费者项目中的契约侧布局仍推荐 `specs/<模块>/<功能>/`。本地可留 `specs/**/pilot` 作 Correctness 沙箱，不入库。
+- `.cursor/hooks/` + `tools/path_align_hooks/`：宿主本地接线（若有）与通用 L0 路径成对脚本；行为以脚本为准，约定以本文件「路径成对」为准。bootstrap 模板在 `skills/bootstrap-agent-workspace/templates/path_align_hooks/`。
 
 ## Agent 工具适配
 
@@ -104,3 +115,8 @@ uv run --no-project python -m unittest discover -s skills/bootstrap-agent-worksp
 - 2026-08-21：删除「Agent 工具适配」小节及目录锚点（决策 v8/v9 后的残留自指记录）；Trae 入口事实由本文件被加载即证。
 - 2026-08-21：上一条所述删除系误操作，「Agent 工具适配」小节与目录锚点已恢复；结构回归单人模式 11 章节，与 skill core-documents.md §4 一致。
 - 2026-08-21：落地多人协同模式（决策 v14）：三层结构（共享宪法 + decisions/ + .agents/ 个人层）、起草-确认制、决策序号晋升认领与撞号规则；本仓库为单人模式，不建 .agents/。
+- 2026-08-22：协作原则增补路径成对（L0 / stop·drift-lite）：契约侧 `specs/`·openapi·schema ↔ 实现侧本仓库 `skills/`（及可选 `src/`）；明确不改动 `specs/<模块>/<功能>/` 三件套层级，成对只约束变更集两侧是否同现；P1 索引与文档职责同步。
+- 2026-08-22：`spec-writing` 小步升格 Properties（第 5 部分附 + 自检 Q16/Q17）；10 段骨架不变；Hypothesis 不强制全仓 CI。
+- 2026-08-22：`bootstrap-agent-workspace` 增加「路径成对钩子」模块（`tools/path_align_hooks/` 通用模板）；完整工具链默认包含；不写分 Harness 适配长文。
+- 2026-08-22：完整工具链默认改为「核心 + 排期 + 路径成对」；`drift-check` 降为自定义可选高级模块。`spec-writing` 钉死 Correctness 变更门（写 P / 跑 PT 分轨；命中才测）。闭环见决策 [015](decisions/015-v15-path-align-default-correctness-gate.md)。
+- 2026-08-22：本发布仓 `specs/` 改 gitignore（不以 Spec 驱动本仓）；验证命令去掉 Hypothesis pilot；README 重心调整为规范化契约。

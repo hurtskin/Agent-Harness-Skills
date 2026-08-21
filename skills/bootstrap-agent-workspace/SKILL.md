@@ -1,6 +1,6 @@
 ---
 name: "bootstrap-agent-workspace"
-description: "跨 Agent Harness 初始化 AI Agent 工作区。SKILL.md 仅负责激活、识别和按需路由；所有原生加载 AGENTS.md 的 Agent Harness（Trae、Codex、OpenCode、Pi、Qoder 等）开箱即用，Claude Code 额外生成 CLAUDE.md 薄入口。协作原则、安全红线与踩坑教训并入 AGENTS.md 唯一 P0 事实源，决策记录采用 decisions/ 目录（一决策一文件 + _INDEX.md 索引），换工具零迁移；支持单人/多人协同（.agents/ 个人层 + 决策晋升流程），可选 drift-check 使用共享 tools/.venv。Invoke when user says '初始化工作区 / 生成协作准则 / 配 AGENTS / bootstrap / 配 agent / 多工具兼容 / harness 兼容 / 多人协同'。"
+description: "跨 Agent Harness 初始化 AI Agent 工作区。SKILL.md 仅负责激活、识别和按需路由；所有原生加载 AGENTS.md 的 Agent Harness（Trae、Codex、OpenCode、Pi、Qoder 等）开箱即用，Claude Code 额外生成 CLAUDE.md 薄入口。协作原则、安全红线与踩坑教训并入 AGENTS.md 唯一 P0 事实源，决策记录采用 decisions/ 目录（一决策一文件 + _INDEX.md 索引），换工具零迁移；支持单人/多人协同（.agents/ 个人层 + 决策晋升流程），可选 drift-check 与路径成对钩子（通用 turn-end 脚本模板，无分 Harness 适配长文）。Invoke when user says '初始化工作区 / 生成协作准则 / 配 AGENTS / bootstrap / 配 agent / 多工具兼容 / harness 兼容 / 多人协同 / 路径成对 / path-align'。"
 ---
 
 # Bootstrap Agent Workspace — 激活与路由
@@ -35,10 +35,12 @@ description: "跨 Agent Harness 初始化 AI Agent 工作区。SKILL.md 仅负�
 | 首屏选择 | 面向用户的效果 | 映射模块 |
 |---|---|---|
 | 快速开始（推荐） | 建好项目协作说明、决策目录和待办排期，适合先把工作区用起来 | 核心工作区文档 + 排期清单 |
-| 完整工具链（适合大型协作） | 在快速开始基础上，检查规范、任务与代码是否逐渐不一致 | 核心工作区文档 + 排期清单 + drift-check |
+| 完整工具链（适合大型协作） | 在快速开始基础上，轮次结束做路径成对提醒，降低单边改契约/实现 | 核心工作区文档 + 排期清单 + 路径成对钩子 |
 | 自定义能力 | 按需组合具体能力 | 进入原有模块多选 |
 
-`drift-check` 仅适用于已经采用 Spec / 文档驱动协作、且需要持续检查文档与实现一致性的项目。不得把它描述为普通小项目的默认必需能力；用户选择“完整工具链”时，也要在确认清单中明确此前提。
+`路径成对钩子` 是完整工具链的默认深度能力（L0，与语言无关）。宿主若支持 hook，由执行 Agent 按当前工具惯例注册；本 Skill 不写分 Harness 适配说明。
+
+`drift-check`（D1–D6）**不在任何默认套餐内**，仅自定义可选。它偏 Python + 特定 Spec 布局的静态结构扫描，日常多语言 / Skill 仓库通常不如路径成对划算；仅在「Python + 字段表/Gherkin/tasks 强绑定且愿意维护 Adapter」时再选。确认清单若勾选了它，须写明该前提。
 
 ### 3.2 技术模块与产物
 
@@ -48,12 +50,15 @@ description: "跨 Agent Harness 初始化 AI Agent 工作区。SKILL.md 仅负�
 | 排期清单 | [`modules/kanban.md`](./modules/kanban.md) | `BACKLOG.md` |
 | drift-check | [`modules/drift-check.md`](./modules/drift-check.md) | `tools/drift_check/` |
 | drift-check | [`modules/python-workspace.md`](./modules/python-workspace.md) | `tools/pyproject.toml` + 单一 `tools/.venv` |
+| 路径成对钩子 | [`modules/path-align-hooks.md`](./modules/path-align-hooks.md) | `tools/path_align_hooks/`（通用脚本模板；无 Harness 专属配置） |
 
 路由规则：
 
 - 未选择 drift-check：不读取其模块文档，不复制源码，不注入强制扫描规则，不创建 tools/ workspace。
 - 选择 drift-check：同时读取 drift-check 模块和 Python workspace 模块，只创建一套 `tools/.venv` 和一个 `tools/uv.lock`。
 - 后续增加其他 Python 工具：更新 workspace members，并按 Python workspace 模块同步共享环境；不得创建第二个环境。
+- 未选择路径成对钩子：不复制 `tools/path_align_hooks/`，不注册任何 hook。
+- 选择路径成对钩子：只落地通用脚本；是否/如何挂到宿主 hook，由执行 Agent 按当前 Harness 自行处理，禁止在本 Skill 内展开分工具适配长文。
 
 ## 4. 启动询问
 
@@ -62,7 +67,7 @@ description: "跨 Agent Harness 初始化 AI Agent 工作区。SKILL.md 仅负�
 > 你希望这次先解决什么？
 >
 > 1. 快速开始（推荐）：建立项目协作说明、决策目录和待办排期，马上开始推进工作。
-> 2. 完整工具链（适合大型协作）：在快速开始基础上，持续检查规范、任务与代码是否一致；仅适合已有 Spec / 文档驱动协作的项目。
+> 2. 完整工具链（适合大型协作）：在快速开始基础上，附带轮次结束路径成对脚本，提醒契约侧与实现侧成对修改。
 > 3. 自定义能力：我想自己组合要安装的能力。
 
 仅当用户选择“自定义能力”时，继续使用一次原有模块多选问题：
@@ -71,9 +76,10 @@ description: "跨 Agent Harness 初始化 AI Agent 工作区。SKILL.md 仅负�
 >
 > - 核心工作区文档
 > - 排期清单
-> - drift-check 漂移检查（仅适用于已有 Spec / 文档驱动协作的项目）
+> - 路径成对钩子（轮次结束 L0 配对脚本模板；宿主支持 hook 时再注册）
+> - drift-check 漂移检查（可选高级；偏 Python + Spec 结构扫描，需维护 Adapter）
 
-随后按套餐映射或自定义结果，汇报“所选套餐 / 技术模块 / 将加载哪些文档 / 将生成哪些产物”。“完整工具链”的确认清单必须再次注明 `drift-check` 的适用前提。等待确认后再执行。
+随后按套餐映射或自定义结果，汇报“所选套餐 / 技术模块 / 将加载哪些文档 / 将生成哪些产物”。若自定义勾选了 `drift-check`，确认清单须注明其 Python/Adapter 前提。等待确认后再执行。
 
 ## 5. 强制边界
 

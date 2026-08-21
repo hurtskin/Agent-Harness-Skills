@@ -1,6 +1,10 @@
 # drift-check 模块
 
-> 仅在用户选择 drift-check 时加载；同时加载 `python-workspace.md`。
+> **可选高级模块**：不在「快速开始 / 完整工具链」默认套餐内；仅自定义勾选时加载，并同时加载 `python-workspace.md`。
+>
+> **定位：** D1–D6 静态结构扫描（三件套版本、字段表↔模型、Gherkin↔测试计数、任务状态等）。当前检测器与模板 Adapter **偏 Python / 特定 Spec 布局**；多语言或纯 Skill 文档仓库日常优先用「路径成对钩子」，不要默认装本模块。
+>
+> **非替代关系：** 不替代 path-align（L0 路径成对），也不替代 Spec Properties / Correctness（行为证明）。
 
 ## 生成
 

@@ -102,8 +102,9 @@
 | 排期清单 | `modules/kanban.md` |
 | drift-check | `modules/drift-check.md` |
 | drift-check | `modules/python-workspace.md` |
+| 路径成对钩子 | `modules/path-align-hooks.md` |
 
-未选择的模块不得生成产物、安装依赖或注入强制规则。选择 drift-check 时，在项目 `tools/` 创建 uv workspace，使用唯一的 `tools/.venv` 和 `tools/uv.lock`。
+未选择的模块不得生成产物、安装依赖或注入强制规则。完整工具链默认含路径成对钩子，不含 drift-check。选择路径成对钩子时，复制通用脚本到 `tools/path_align_hooks/`；不在本 Skill 内写入分 Harness 的 hook 配置样板。仅自定义勾选 drift-check 时，在项目 `tools/` 创建 uv workspace，使用唯一的 `tools/.venv` 和 `tools/uv.lock`。
 
 生成或升级工具入口（如 `CLAUDE.md`）前必须形成产物清单：
 

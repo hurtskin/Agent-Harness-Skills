@@ -19,8 +19,14 @@ REQUIRED_FILES = (
     "modules/kanban.md",
     "modules/drift-check.md",
     "modules/python-workspace.md",
+    "modules/path-align-hooks.md",
     "templates/kanban/BACKLOG.md.template",
     "templates/tools/pyproject.toml.template",
+    "templates/path_align_hooks/README.md",
+    "templates/path_align_hooks/drift_lite.ps1",
+    "templates/path_align_hooks/drift_lite.sh",
+    "templates/path_align_hooks/turn_align.ps1",
+    "templates/path_align_hooks/turn_align.sh",
     "templates/drift_check/pyproject.toml",
     "templates/drift_check/src/drift_check/cli.py",
     "templates/drift_check/src/drift_check/adapters/base.py",
@@ -28,7 +34,7 @@ REQUIRED_FILES = (
     "templates/drift_check/tests/test_d1_version.py",
 )
 ADAPTERS = ("claude-code",)
-MODULES = ("kanban", "drift-check", "python-workspace")
+MODULES = ("kanban", "drift-check", "python-workspace", "path-align-hooks")
 ADAPTER_HEADINGS = ("检测信号", "生成策略", "校验")
 FACT_SOURCES = {
     "AGENTS.md",

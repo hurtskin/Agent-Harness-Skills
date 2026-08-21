@@ -1,6 +1,6 @@
 ---
 name: "spec-writing"
-description: "Spec 文档编写规范(10 段强制结构 + 完整示例 + 强制零自由发挥约束 + 落地前 15 题自检)。Invoke when 立 spec / 写 spec / 评审 spec / 补 spec 三件套(spec.md / tasks.md / checklist.md) / 检查 spec 完整性 / 排查 spec 是否留有自由发挥空间。加载通用模板与字段约束,按 10 段结构(spec 元数据 / 术语表 / Gherkin / OpenAPI / JSON Schema / 状态机 / 错误码 / 覆盖矩阵 / 非功能需求 / 假设约束)落 spec;落地前必跑 §6 11 维度钉死清单 + §7 15 题自检(对齐 / 遗漏 / 自由发挥空间),任一题 ❌ 不允许进入实施阶段。"
+description: "Spec 文档编写规范(10 段强制结构 + Properties 行为不变量推荐 + 完整示例 + 零自由发挥 + 落地前 15+2 题自检)。Invoke when 立 spec / 写 spec / 评审 spec / 补 spec 三件套(spec.md / tasks.md / checklist.md) / 检查 spec 完整性 / 排查自由发挥空间 / 补性质 Properties。按 10 段结构落 spec,关键推荐 Properties(∀ oracle) 供 PBT/Correctness;落地前必跑 15 题自检 + Properties 2 题。"
 ---
 
 # Spec 文档编写规范与生成规则
@@ -31,6 +31,7 @@ description: "Spec 文档编写规范(10 段强制结构 + 完整示例 + 强制
   - API 契约:`openapi.yaml`
   - 数据模型:`{实体名}.schema.json`
   - 状态机:`{实体名}_states.yaml`
+  - 行为不变量(推荐):`properties.md`（或写入 `spec.md` 的 Properties 小节）
 - **代码关联**:在 `spec.md` 的元数据部分必须明确关联的代码路径,例如:
   - 代码包路径:`src/auth/registration/`
   - API 路由文件:`src/auth/routes/registration.ts`
@@ -171,6 +172,38 @@ states:
 | 是             | 否             | 是             | 拒绝 (缺少字母) |
 | 否             | 任意           | 任意           | 拒绝 |
 
+### 第 5 部分附: Properties 行为不变量（推荐 / Correctness）
+
+> **推荐升格（非第 11 段强制）:** 10 段骨架不变。凡含**关键业务行为**（注册、状态迁移、冲突、决策表）的 Spec,**应**增加 Properties,把 SHALL 写成可执行 ∀ 公式,供 Property-Based Testing 作 oracle。纯叙事 NFR / 假设段可不写性质。  
+> **沙箱说明:** 发布仓可不跟踪 `specs/`；性质示例与装订片段见下文「推荐范例」。消费者项目按自身栈实现 `PT-*`，勿默认嵌入全仓 PBT。
+
+- 每条性质必须有:`性质 ID`（`P-{域}-{序号}`）`回链`（Gherkin / 状态机 / 错误码 / REQ-ID）`量化式` `生成器约定` `自动化 ID`（`PT-…`,可暂「未自动化」但须给期限）。
+- 量化式须可判定真假:优先 `∀ … ⇒ …`;禁止「体验良好」等不可观测结论。
+- 覆盖矩阵（§7）**允许**增加 `P-*` / `PT-*` 行;类型可标「属性测试」。
+- **一致性保障:** 性质是行为契约;字段级零自由发挥（§4）仍要钉死。两者叠加:结构可复刻 + 行为可证伪。
+- **语言不绑定:** PT 用被测实现同语言的属性测试工具即可;本仓 pilot 用 Python 仅为示范。
+
+**最小表格模板:**
+
+| 性质 ID | 回链 | 量化式（oracle） | 生成器 | 自动化 |
+|---------|------|------------------|--------|--------|
+| P-XXX-01 | REQ-… / Gherkin… | `∀ … ⇒ …` | `valid_…` | PT-XXX-001 |
+
+#### Correctness 变更门（何时必须跑 PT）
+
+分清两步：**写 P-\***（立/改 Spec）与 **跑 PT-\***（验证实现）。path-align / drift-lite 只做路径成对，**从不**自动等于 Correctness。
+
+| 动作 | 必须何时做 | 不做的情况 |
+|---|---|---|
+| **写 `P-*`** | Spec 含写入 / 状态迁移 / 冲突·幂等 / 决策表等关键行为（落地前 Q16） | 纯叙事 NFR、假设段、仅改措辞 → Q16 = N/A + 理由 |
+| **跑对应 `PT-*`** | 本轮 dirty/diff **命中**该 `P-*` 所约束的实现，或改了该 `P-*` / 生成器 / oracle 正文；或覆盖矩阵已标「已自动化」且上述文件进入合并 diff | 仅 path-align 报警；只改 `AGENTS.md` / 排期 / 排版；该 Spec 对 Properties 合法 N/A |
+
+执行约定：
+
+1. 只跑**命中的** `PT-*`，禁止「每轮 stop 全仓扫一遍 PBT」。
+2. 合并/CI：由项目自行决定是否把已声明「已自动化」的 `PT-*` 进门禁；Skill **不**强制全仓绑定某一 PBT 库。
+3. 未自动化的 `PT-*` 须在矩阵留期限；逾期未补 = Spec/门禁未完成（与 Q17 一致）。
+
 ### 第 6 部分:错误处理与日志规范
 
 - 定义 **错误码字典**,表格列:`错误码` `HTTP 状态码` `触发条件` `日志级别`。
@@ -189,8 +222,9 @@ states:
 ### 第 7 部分:测试用例与需求覆盖矩阵
 
 - 建立 **需求追溯矩阵**,表格列:`需求来源` `需求 ID` `类型` `测试用例 ID` `自动化状态`。
-- 需求来源必须是本文档中的具体章节(如 Gherkin 场景、API 端点、状态机转换、业务规则)。
+- 需求来源必须是本文档中的具体章节(如 Gherkin 场景、API 端点、状态机转换、业务规则、**Properties**)。
 - **自动化状态** 只有 `已自动化` 或 `未自动化`(未自动化必须给出理由和期限)。
+- 允许行:`TC-*`(验收)、`CT-*`(契约)、`UT-*`(单元)、`PT-*` / `P-*`(属性 / 性质)。
 - **一致性保障**:通过代码注解(如 `@spec("SPEC-001", "REQ-XX")`)自动生成该矩阵,并作为 CI 覆盖率门禁。
 
 **示例:**
@@ -235,9 +269,9 @@ states:
 1. **文档语言**:主体使用中文,术语、代码、技术标识使用英文。
 2. **完整性检查**:生成 Spec 后,必须自我检查 10 个部分是否全部涵盖,不能遗漏。
 3. **示例驱动**:每一部分至少包含一个具体示例(参考下文给出的示例片段)。
-4. **可执行性声明**:在文档头部注明"本规范中的 Gherkin 场景可执行,OpenAPI 文件可用于代码生成,状态机可导入代码",提醒使用者这是可运行制品。
+4. **可执行性声明**:在文档头部注明"本规范中的 Gherkin 场景可执行,OpenAPI 文件可用于代码生成,状态机可导入代码;关键行为宜附 Properties 供 PBT",提醒使用者这是可运行制品。
 5. **与示例风格保持一致**:当遇到新领域时,类比示例"用户邮箱注册与验证"的详细程度和编排方式生成对应内容。
-6. **落地前自检门禁 `pre_implementation_gate`** ⚠️ **MANDATORY**:spec 三件套(spec.md / tasks.md / checklist.md)写完后,**必须**执行 §6「落地前 15 题自检」全部 15 题。任一题答 ❌ → 回 §5 修补 spec → 重检 → 全部 ✅ 才允许进入实施阶段。**禁止**「先动手再补自检」「自检不通过先开着口子后续补」。
+6. **落地前自检门禁 `pre_implementation_gate`** ⚠️ **MANDATORY**:spec 三件套(spec.md / tasks.md / checklist.md)写完后,**必须**执行 §6「落地前自检」全部 15 题,**外加** §6.4 Properties 2 题(共 17)。任一题答 ❌ → 回修补 spec → 重检 → 全部 ✅ 才允许进入实施阶段。**禁止**「先动手再补自检」「自检不通过先开着口子后续补」。无关键业务行为的纯文档 Spec,Properties 2 题可答「N/A(无关键行为)」并写明理由。
 7. **零自由发挥铁律 `zero_improvisation`** ⚠️ **MANDATORY**:实施阶段(写代码 / 写测试 / 改字段)发现 spec 漏了某条约束 → **暂停** → 回 §5 补 spec → §6 重检 → 再继续写代码。**禁止**「我先这样写,spec 后补」「这个字段 spec 没写我就按习惯来」「这点小事不用进 spec」。
 
 ---
@@ -295,9 +329,9 @@ states:
 
 ---
 
-## 6. spec 落地前 15 题自检 (Mandatory Pre-Implementation Self-Audit)
+## 6. spec 落地前自检 (Mandatory Pre-Implementation Self-Audit)
 
-> 本节是 §4 第 6 条「落地前自检门禁」的具体清单。spec 三件套写完 → 实施阶段开始前**必答 15 题**;任一题 ❌ → 回 §5 修补 spec → 重检;全部 ✅ → 才允许动代码。**禁止**「先动手再补自检」「自检不通过先开着口子」。
+> 本节是 §4 第 6 条「落地前自检门禁」的具体清单。spec 三件套写完 → 实施阶段开始前**必答 15 题 + Properties 2 题(共 17)**;任一题 ❌ → 回修补 spec → 重检;全部 ✅(或 Properties 合法 N/A) → 才允许动代码。**禁止**「先动手再补自检」「自检不通过先开着口子」。
 >
 > **下表「失败处理」列中的「§N」指 spec 文档的段落编号**(§0-§9,见 §3 文档结构模板),**不是本 skill 的章节编号**;「§5」特指本 skill 的 §5「实施零自由发挥约束」。
 
@@ -308,7 +342,7 @@ states:
 | 1 | 代码中每个字段名是否都能在 spec §4 找到一一对应出处? | 100% 字段名逐字一致 | 回 §4 改 spec 或改代码 → 重检 |
 | 2 | 每个函数签名(参数 / 返回类型 / 默认值)是否与 spec §5 一致? | 100% 签名逐字一致 | 回 §5 改 spec 或改代码 → 重检 |
 | 3 | 每个枚举值是否与 spec §1 术语表 + §4 完全一致(含顺序)? | 成员 + 顺序逐字一致 | 回 §1 / §4 改 → 重检 |
-| 4 | 每个测试用例 ID 是否与 spec §7 覆盖矩阵逐字一致? | TC-XX-NNN 编号 100% 一致 | 回 §7 改 → 重检 |
+| 4 | 每个测试用例 ID 是否与 spec §7 覆盖矩阵逐字一致? | `TC-`/`CT-`/`UT-`/`PT-` 编号 100% 一致 | 回 §7 改 → 重检 |
 | 5 | 每个默认值 / 校验器 / 错误码是否与 spec 逐字一致? | 100% 一致 | 回 §4 / §5 / §6 改 → 重检 |
 
 ### 6.2 细节遗漏自检(5 题)
@@ -331,10 +365,17 @@ states:
 | 14 | 是否存在「类比 X」「参考 X」未给精确约束? | 类比项都展开成完整字段清单 | 展开类比 → 重检 |
 | 15 | 是否存在 spec 未声明但实施必须做的动作(如导入 / 序列化 / 比较)? | 实施所需动作 100% 在 spec 中 | 回 §5 补声明 → 重检 |
 
-### 6.4 自检执行模板(粘贴到 spec 同目录 `self-check.md`)
+### 6.4 Properties 门禁(2 题，小步升格)
+
+| # | 自检问题 | ✅ 通过标准 | ❌ 失败处理 |
+|---|----------|-------------|-------------|
+| 16 | 关键业务行为(写/状态迁移/冲突/决策表)是否都有 `P-*` 性质 ID + ∀ 量化式(或合法 N/A)? | 每条关键行为有 P-id 与可判定 oracle;无关键行为则 N/A+理由 | 按「第 5 部分附」补 Properties → 重检 |
+| 17 | 每条 `P-*` 是否回链 REQ/Gherkin/状态机/错误码,且覆盖矩阵有对应 `PT-*`(或未自动化期限)?后续变更是否按「Correctness 变更门」只跑命中 PT? | 回链完整;矩阵有 PT 行或未自动化+期限;变更门约定已理解 | 补回链 / 矩阵行 / 重读变更门 → 重检 |
+
+### 6.5 自检执行模板(粘贴到 spec 同目录 `self-check.md`)
 
 ```markdown
-# Spec 落地前 15 题自检 - {spec 编号}
+# Spec 落地前自检(15+2) - {spec 编号}
 
 > 执行时间: {YYYY-MM-DD HH:MM}
 > 执行人: {agent / user}
@@ -360,10 +401,14 @@ states:
 - [ ] Q14 类比精确约束: ✅/❌ {未展开类比}
 - [ ] Q15 实施必需动作声明: ✅/❌ {未声明动作}
 
+## 6.4 Properties(2 题)
+- [ ] Q16 关键行为有 P-* / 或 N/A: ✅/❌/N/A {证据或理由}
+- [ ] Q17 P-* 回链 + PT-* 矩阵行: ✅/❌/N/A {证据}
+
 ## 结论
-- 总计 ✅: {N}/15
-- 总计 ❌: {N}/15
-- 进入实施阶段: 是 / 否(否则回 §5 修补 spec → 重检)
+- 总计 ✅: {N}/17（N/A 计为通过并附理由）
+- 总计 ❌: {N}/17
+- 进入实施阶段: 是 / 否(否则回修补 spec → 重检)
 ```
 
 ---
@@ -372,7 +417,7 @@ states:
 
 > 以下示例不仅展示 10 段结构,还展示如何达到 §5「零自由发挥」标准——每个字段、每个错误码、每个测试用例 ID 都钉死到可逐字复刻。新领域写 spec 时应类比此示例的精度,而非仅类比结构。
 
-下面给你一个完整的 Spec 文档示例,主题是 **"用户邮箱注册与验证"** 。这份文档严格按照前文所述的 10 个部分编写,并且每一部分都会连带说明它 **如何与代码保持高度一致**。
+下面给你一个完整的 Spec 文档示例,主题是 **"用户邮箱注册与验证"** 。这份文档严格按照前文所述的 10 个部分编写,并附 **Properties 推荐范例**;每一部分都会连带说明它 **如何与代码保持高度一致**。
 
 # SPEC-001: 用户邮箱注册与验证
 
@@ -717,6 +762,90 @@ states:
 - **基于属性的测试:** 根据密码决策表编写属性测试,随机生成符合/不符合规则的字符串,断言 `isValidPassword()` 结果与决策表一致。
 - **集成测试状态流转:** 模拟调用邮箱验证接口,断言数据库状态从 `PENDING_VERIFICATION` 变为 `ACTIVE`,并检查状态机是否允许。
 
+### Properties（推荐范例 / Correctness）
+
+> **状态:** 推荐范例（小步升格）。**不是**第 11 段强制结构;有关键业务行为的 Spec 应按「第 5 部分附」书写同类小节。  
+> **文件建议:** `/specs/auth/registration/properties.md`（或本文件子节）。发布 Skill 仓可不入库 `specs/`。  
+> **生成器约定:** `valid_email` = 满足 JSON Schema `format:email` 且 `maxLength≤254`；`valid_password` = 满足 `minLength≥8` 且 pattern「至少一字母一数字」；`UserStatus` / `Event` 枚举取自本 Spec 正文。
+
+| 性质 ID | 回链 | 量化式（oracle） | 建议生成器 | 自动化 |
+|---------|------|------------------|------------|--------|
+| P-REG-01 | Gherkin 成功注册；REQ-REG-01 | 见下 | `valid_email` × `valid_password` + `assume(not email_exists)` | PT-REG-101 |
+| P-REG-02 | Gherkin 已注册邮箱；错误码表；REQ-REG-02 | 见下 | `valid_email` × `valid_password` × `UserStatus` | PT-REG-102 |
+| P-REG-03 | 状态机 YAML；REQ-REG-06 | 见下 | `UserStatus` × `Event` | PT-REG-103 |
+
+**P-REG-01 — 新邮箱注册必进入待验证态**
+
+```text
+∀ email ∈ valid_email, ∀ password ∈ valid_password,
+当 email 未被占用时：
+  r = register(email, password)
+  ⇒ r.http == 201
+  ∧ r.body.user_id 存在且为 UUID
+  ∧ r.user.status == PENDING_VERIFICATION
+  ∧ r.user.email == email
+```
+
+**P-REG-02 — 已占用邮箱注册必冲突且不改写用户**
+
+```text
+∀ email ∈ valid_email, ∀ password_old, password_new ∈ valid_password,
+∀ status ∈ {PENDING_VERIFICATION, ACTIVE, DISABLED},
+当 email 已以 status 存在时：
+  before = snapshot(email)
+  r = register(email, password_new)
+  ⇒ r.http == 409
+  ∧ r.error_code == "EMAIL_ALREADY_REGISTERED"
+  ∧ snapshot(email) == before
+```
+
+**P-REG-03 — 状态机闭包（仅允许表内迁移）**
+
+```text
+Allowed = {
+  (PENDING_VERIFICATION, VERIFY) → ACTIVE,
+  (PENDING_VERIFICATION, EXPIRE) → DISABLED,
+  (ACTIVE, DISABLE) → DISABLED
+}
+
+∀ status ∈ UserStatus, ∀ event ∈ {VERIFY, EXPIRE, DISABLE}:
+  若 (status, event) ∈ Allowed
+    ⇒ apply(status, event) == Allowed[(status, event)]
+  否则
+    ⇒ apply(status, event) 抛出领域错误（不得静默保持或迁到表外状态）
+```
+
+**装订示例（Hypothesis；工具可选，oracle 必填）:**
+
+```python
+# 示意：消费者项目用同语言属性测试工具装订；非发布仓 CI 门禁。
+@given(valid_email(), valid_password())
+def test_P_REG_01(email, password, fresh_db):
+    assume(not email_exists(email))
+    r = register(email, password)
+    assert r.status_code == 201
+    assert r.user.status == "PENDING_VERIFICATION"
+
+ALLOWED = {
+    ("PENDING_VERIFICATION", "VERIFY"): "ACTIVE",
+    ("PENDING_VERIFICATION", "EXPIRE"): "DISABLED",
+    ("ACTIVE", "DISABLE"): "DISABLED",
+}
+
+@given(st.sampled_from(USER_STATUSES), st.sampled_from(EVENTS))
+def test_P_REG_03(status, event):
+    if (status, event) in ALLOWED:
+        assert apply_transition(status, event) == ALLOWED[(status, event)]
+    else:
+        with pytest.raises(DomainError):
+            apply_transition(status, event)
+```
+
+**范例要点:**
+- Gherkin 单例邮箱 → 性质需补 **输入空间**（生成器）与 **assume**。
+- 冲突场景只写了 ACTIVE → 性质要求 **∀ UserStatus**，比原场景更强。
+- 状态机 YAML → `Allowed` 表即唯一迁移 oracle；非法边必须有失败语义（本范例钉死为抛错）。
+
 ---
 
 ## 7. 错误处理与日志规范
@@ -750,10 +879,14 @@ states:
 | API: POST /register 409 | REQ-REG-05 | 契约测试 | CT-REG-002 | 已自动化 |
 | 状态机: PENDING -> ACTIVE | REQ-REG-06 | 单元测试 | UT-REG-003 | 已自动化 |
 | 业务规则: 密码强度 | REQ-REG-07 | 属性测试 | PT-REG-001 | 已自动化 |
+| Properties: P-REG-01 新邮箱→PENDING | REQ-REG-01 | 属性测试 | PT-REG-101 | 示例行（消费者项目自行自动化；非本仓 CI） |
+| Properties: P-REG-02 冲突不改写 | REQ-REG-02 | 属性测试 | PT-REG-102 | 示例行（消费者项目自行自动化；非本仓 CI） |
+| Properties: P-REG-03 状态机闭包 | REQ-REG-06 | 属性测试 | PT-REG-103 | 示例行（消费者项目自行自动化；非本仓 CI） |
 
 **一致性保障:**
 - **覆盖率门禁:** CI 中运行需求覆盖率报告,所有 `REQ-REG-*` 必须有对应的自动化测试通过,否则不允许合并。
 - **自动关联:** 在测试代码中使用 `@spec("SPEC-001", "REQ-REG-01")` 装饰器,脚本扫描测试代码生成上述矩阵。
+- **Properties:** `P-REG-*` / `PT-REG-101..103` 为推荐范例；关键行为须过自检 Q16/Q17。Hypothesis 为可选工具,不以全仓 CI 强制依赖为门槛。
 
 ---
 

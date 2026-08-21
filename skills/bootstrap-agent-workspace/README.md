@@ -2,7 +2,7 @@
 
 面向主流 Agent Harness 的 AI Agent 工作区初始化 Skill。它将激活路由、跨工具公共规则、客户端适配和可选工具拆分为独立文档，只加载本次真正需要的部分。
 
-所有原生加载项目根 `AGENTS.md` 的 Agent Harness（Trae、Codex、OpenCode、Pi、Qoder 等）开箱即用；Claude Code 额外生成 `CLAUDE.md` 薄入口。协作原则、安全红线与踩坑教训并入 `AGENTS.md` 唯一 P0 事实源，决策记录采用 `decisions/` 目录（一决策一文件 + `_INDEX.md` 索引），换工具零迁移；drift-check 使用项目 `tools/` 下的共享 Python 环境。
+所有原生加载项目根 `AGENTS.md` 的 Agent Harness（Trae、Codex、OpenCode、Pi、Qoder 等）开箱即用；Claude Code 额外生成 `CLAUDE.md` 薄入口。协作原则、安全红线与踩坑教训并入 `AGENTS.md` 唯一 P0 事实源，决策记录采用 `decisions/` 目录（一决策一文件 + `_INDEX.md` 索引），换工具零迁移。完整工具链默认带路径成对钩子；`drift-check` 仅自定义可选（偏 Python，需共享 `tools/` 环境）。
 
 ## 核心特性
 
@@ -10,13 +10,13 @@
 - `COMMON.md` 维护跨工具公共流程、单一事实源和产物门禁
 - 所有原生加载 `AGENTS.md` 的工具零适配；仅 Claude Code 有独立适配器（`CLAUDE.md` 入口差异）
 - 支持单人 / 多人协同：多人时共享宪法 Git 跟踪 + `.agents/` 个人层不跟踪 + 决策晋升流程（草稿无号 → 晋升认领序号 → 人工 review 合并）
-- 核心文档、排期、drift-check 均可独立选择
+- 核心文档、排期、路径成对钩子可独立选择；drift-check 仅自定义可选
 - 未选模块不加载、不生成、不安装依赖，也不注入规则
 - 已有文件默认增量升级，覆盖或重建必须得到明确授权
 - 客户端入口只保存索引和必要差异，不复制完整公共事实
 - 初始化完成后的日常上下文按 P0 / P1 / P2 分级加载：AGENTS.md 唯一常驻，决策历史默认按需读取
 - 分级加载不改变初始化阶段的模块按需路由，也不改变现有公共事实源路径
-- 两个 Python 工具共享唯一的 `tools/.venv` 和 `tools/uv.lock`
+- 两个可选 Python 工具（当前主要为 drift-check）若启用则共享唯一的 `tools/.venv` 和 `tools/uv.lock`
 
 ## 触发方式
 
@@ -44,12 +44,12 @@ SKILL.md
 ├── adapters/claude-code.md           仅当前工具为 Claude Code 时
 ├── 首屏按目的选择场景套餐
 │   ├── 快速开始（推荐）
-│   ├── 规范治理（适合长期项目）
 │   ├── 完整工具链（适合大型协作）
 │   └── 自定义能力 → 再显示技术模块多选
 ├── workflows/core-documents.md      套餐映射或自定义选中核心文档时
 ├── modules/kanban.md                套餐映射或自定义选中排期时
-├── modules/drift-check.md            套餐映射或自定义选中 drift-check 时
+├── modules/path-align-hooks.md       完整工具链或自定义选中路径成对时
+├── modules/drift-check.md            仅自定义选中 drift-check 时
 ├── modules/python-workspace.md      选中任一 Python 工具时
 └── workflows/verification.md        最后按确认范围验收
 ```
@@ -57,20 +57,20 @@ SKILL.md
 首次引导先询问用户想达到什么效果，首屏不要求理解 drift 等术语：
 
 1. **快速开始（推荐）**：建立项目协作说明、决策目录和待办排期，马上开始推进工作。
-2. **完整工具链（适合大型协作）**：在快速开始基础上，持续检查规范、任务与代码是否一致。此项仅适合已有 Spec / 文档驱动协作的项目，不是普通小项目的默认选择。
-3. **自定义能力**：自行组合具体能力，此时才显示原有技术模块多选。
+2. **完整工具链（适合大型协作）**：在快速开始基础上，附带轮次结束路径成对脚本，提醒契约侧与实现侧成对修改。
+3. **自定义能力**：自行组合具体能力，此时才显示技术模块多选（含可选高级 `drift-check`）。
 
-确认前会汇报所选套餐、对应技术模块、将加载的文档和将生成的产物；完整工具链会再次提示一致性检查的适用前提。未选择的模块不会参与执行。
+确认前会汇报所选套餐、对应技术模块、将加载的文档和将生成的产物。未选择的模块不会参与执行。
 
 ## 套餐映射与模块产物
 
 | 场景套餐 | 技术模块 |
 |---|---|
 | 快速开始（推荐） | 核心工作区文档 + 排期清单 |
-| 完整工具链（适合大型协作） | 核心工作区文档 + 排期清单 + drift-check |
-| 自定义能力 | 进入核心工作区文档、排期清单、drift-check 原有多选 |
+| 完整工具链（适合大型协作） | 核心工作区文档 + 排期清单 + 路径成对钩子 |
+| 自定义能力 | 核心工作区文档、排期清单、路径成对钩子、drift-check（可选高级）多选 |
 
-技术模块名在确认清单或自定义入口中展示。`drift-check` 仅适用于已有 Spec / 文档驱动协作、需要持续检查文档与实现一致性的项目，避免将完整工具链误导为普通小项目的默认方案。
+技术模块名在确认清单或自定义入口中展示。`路径成对钩子` 是完整工具链默认深度能力（L0，与语言无关）；如何挂到宿主 hook 由执行 Agent 按当前工具处理，Skill 内不写分 Harness 适配长文。`drift-check` **不在默认套餐内**，仅自定义可选：偏 Python + 特定 Spec 布局的静态扫描，需维护 Adapter；日常多语言 / Skill 仓库通常不如路径成对划算。
 
 | 选择 | 加载文档 | 主要产物 |
 |---|---|---|
@@ -78,8 +78,9 @@ SKILL.md
 | 排期清单 | `modules/kanban.md` | `BACKLOG.md` |
 | drift-check | `modules/drift-check.md` | `tools/drift_check/` |
 | drift-check | `modules/python-workspace.md` | `tools/pyproject.toml`、`tools/.venv`、`tools/uv.lock` |
+| 路径成对钩子 | `modules/path-align-hooks.md` | `tools/path_align_hooks/` |
 
-核心文档不是 drift-check 的强制前置条件。例如仅选择 drift-check 时，不会为了登记适配状态而创建 `AGENTS.md`。
+核心文档不是路径成对或 drift-check 的强制前置条件。例如仅选择工具模块时，不会为了登记适配状态而创建 `AGENTS.md`。
 
 ## 单一事实源
 
@@ -200,10 +201,12 @@ bootstrap-agent-workspace/
 ├── modules/
 │   ├── kanban.md
 │   ├── drift-check.md
-│   └── python-workspace.md
+│   ├── python-workspace.md
+│   └── path-align-hooks.md
 └── templates/
     ├── tools/pyproject.toml.template
     ├── drift_check/
+    ├── path_align_hooks/
     └── kanban/BACKLOG.md.template
 ```
 
@@ -222,7 +225,7 @@ bootstrap-agent-workspace/
 
 - 将旧版工作区文档迁移到单一事实源结构（含旧体系 `soul.md` / `lessons-learned.md` 并入 `AGENTS.md`，单文件 `决策日志.md` 拆分为 `decisions/` 目录）
 - 为现有项目增加客户端薄入口
-- 接入 drift-check 或共享 Python workspace
+- 接入 drift-check、路径成对钩子或共享 Python workspace
 
 重建或覆盖任何已有文件前必须获得用户明确授权。
 
