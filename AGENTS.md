@@ -10,6 +10,7 @@
 - [踩坑教训](#踩坑教训)
 - [P1 / P2 索引](#p1--p2-索引)
 - [文档职责](#文档职责)
+- [Agent 工具适配](#agent-工具适配)
 - [AGENTS.md 变更日志](#agentsmd-变更日志)
 
 ## 项目定位
@@ -82,6 +83,12 @@ uv run --no-project python -m unittest discover -s skills/bootstrap-agent-worksp
 - `BACKLOG.md`（排期清单）：只保留未完成项；完成即移除，闭环在 decisions/ 新建决策文件并追加 `_INDEX.md` 索引行。
 - `decisions/`：P2 决策目录，一决策一文件（`序号-版本-关键词.md`）；`_INDEX.md` 是唯一索引表。
 
+## Agent 工具适配
+
+| 工具 | 自动加载入口 | 状态 | 来源 | 最后确认日期 |
+|---|---|---|---|---|
+| Trae | `AGENTS.md` | active | 运行时证据 | 2026-08-21 |
+
 ## AGENTS.md 变更日志
 
 - 2026-08-05：初始化规范治理短导航，登记 Trae 入口，建立 P1/P2 索引和共享工具命令。
@@ -95,4 +102,5 @@ uv run --no-project python -m unittest discover -s skills/bootstrap-agent-worksp
 - 2026-08-21：收编 `spec-writing` 为第三个发布 Skill（决策 v12）；删除 crawl 项目专属适配声明，规范本体未改。
 - 2026-08-21：初始化新增协作模式询问，AGENTS.md 项目定位标记协作模式（决策 v13）；本仓库为单人。
 - 2026-08-21：删除「Agent 工具适配」小节及目录锚点（决策 v8/v9 后的残留自指记录）；Trae 入口事实由本文件被加载即证。
+- 2026-08-21：上一条所述删除系误操作，「Agent 工具适配」小节与目录锚点已恢复；结构回归单人模式 11 章节，与 skill core-documents.md §4 一致。
 - 2026-08-21：落地多人协同模式（决策 v14）：三层结构（共享宪法 + decisions/ + .agents/ 个人层）、起草-确认制、决策序号晋升认领与撞号规则；本仓库为单人模式，不建 .agents/。
