@@ -2,116 +2,130 @@
 
 面向 Trae 与主流 Agent Harness 的可独立发布 Skills 集合。
 
-本仓库要解决的不只是「把规则文件拷进项目」，而是让 Agent 协作**靠契约推进**：什么能改、改了要同步什么、关键行为如何写清——尽量少靠口述记忆。工作区初始化、Spec 写法、任务交接，是同一条线上的三块积木。
+精髓是 **`bootstrap-agent-workspace`**：问诊式初始化工作区。两条并列的核心能力：
 
-## 这次更靠近什么
+1. **多人协同**——共享宪法 Git 锁死，个人上下文 Git 无视，人做晋升闸门；多人各带 AI 也不把项目规范撕成三份。
+2. **路径成对钩子（本轮增量）**——轮次结束轻量盯住契约侧 ↔ 实现侧是否同现，单边改当轮提醒，而不是事后人肉对账。
 
-相对早期「建好 AGENTS / decisions 就能干活」，当前重心多了一层**规范化契约**：
-
-| 层级 | 做什么 | 重不重 |
-|---|---|---|
-| **工作区宪法** | `AGENTS.md` + `decisions/` + 排期；换 Harness 仍读同一套事实 | 默认就要 |
-| **路径成对（L0）** | 轮次结束看 dirty：契约侧与实现侧是否同现，防单边改 | 轻；完整工具链默认带 |
-| **Spec 契约** | 10 段钉死 + 零自由发挥；关键行为可写 Properties（∀ 思路） | 按需；写法进 `spec-writing` |
-| **行为 Correctness** | 改到相关实现再跑对应性质测试 | **思想可借鉴，本仓库不强制、不重型嵌入** |
-
-本发布仓库本身**不是** Spec 驱动业务仓：不以全仓 PBT / Hypothesis 为门禁；轻量约定写进 Skill，重型靶标留给消费者项目自己选。
-
-## 三块积木
-
-| Skill | 角色 | 入口 |
-|---|---|---|
-| **`bootstrap-agent-workspace`** | 问诊式初始化工作区：宪法、决策档案、套餐化可选能力（含路径成对钩子） | [`skills/bootstrap-agent-workspace/SKILL.md`](./skills/bootstrap-agent-workspace/SKILL.md) |
-| **`spec-writing`** | 把需求写成可复刻契约：10 段结构、零自由发挥、15+2 自检；推荐 Properties + Correctness **变更门**（写 P / 跑 PT 分轨，命中才测） | [`skills/spec-writing/SKILL.md`](./skills/spec-writing/SKILL.md) |
-| **`task-handoff`** | 长任务可验证交接，降低换会话丢上下文 | [`skills/task-handoff/SKILL.md`](./skills/task-handoff/SKILL.md) |
-
-三者可单独发布；`bootstrap` 负责「项目里怎么协作」，`spec-writing` 负责「单份契约怎么写到实施不自由发挥」，`task-handoff` 负责「会话之间怎么交接」。
+另外两个 Skill（`spec-writing` / `task-handoff`）是配套。
 
 ---
 
-## bootstrap-agent-workspace：先问诊，再开方
+## 核心一：多人协同
 
-解决：AI 每次从零开始、规范靠口述、决策没人记得、多人互相覆盖。
-
-它不是「复制一套模板完事」，而是 AI 主导的按需组装：
-
-```text
-1. 问诊   读仓库证据，推断项目与协作模式；没证据就问，不瞎猜
-2. 选套餐 只问效果，不甩模块名：
-          1. 快速开始（推荐）：协作说明 + 决策目录 + 待办排期
-          2. 完整工具链：再加轮次结束「路径成对」提醒（契约侧 ↔ 实现侧）
-          3. 自定义：自己勾选（含可选高级 drift-check；偏 Python，非默认）
-3. 确认   汇报将生成的产物，你点头才动手；已有文件默认增量升级
-4. 生成   只加载选中模块；未选不装、不注入规则
-```
-
-### 初始化后的核心产物
-
-```text
-project/
-├── AGENTS.md       # AI 宪法：原则、红线、教训、当前入口（换工具仍加载）
-├── BACKLOG.md      # 未完成排期
-└── decisions/      # 一决策一文件 + _INDEX.md 关键词索引
-```
-
-Trae / Codex / OpenCode / Pi / Qoder 等原生加载 `AGENTS.md`；Claude Code 额外生成 `CLAUDE.md` 薄入口。
-
-### 单人日常
-
-```text
-新会话   读 AGENTS.md → 原则与入口齐了
-做决策   验证通过后落 decisions/，登记 _INDEX.md
-踩了坑   在 AGENTS.md 教训区追加「错误 → 正确」
-待办     BACKLOG 进出；闭环进 decisions/
-契约改动 若装了路径成对钩子：只改实现或只改契约时会被提醒补另一侧
-```
-
-单人模式下你是确认闸门：AI 起草，你点头再生效。
-
-### 多人模式（核心设计）
-
-痛点：共享文件人人冲突，各写各的又会裂成三套「项目灵魂」。
+多人同时和各自的 AI 协作时，最大痛点是：工作记忆写哪里？写进共享文件 → pull 冲突地狱；各自为政 → 一周后三套互相看不懂的「项目灵魂」。
 
 答案：**共享宪法 Git 跟踪，个人上下文 Git 忽略，人做晋升闸门。**
 
+### 三层结构
+
 ```text
 project/
-├── AGENTS.md / BACKLOG.md / decisions/   # 宪法 + 决策 ⭐ 跟踪；AI 起草-确认
-└── .agents/<成员>/context.md + scratchpad.md   # 个人层 ⛔ 不跟踪
+├── AGENTS.md                 # 宪法层 ⭐ 跟踪：原则、红线、踩坑教训
+├── BACKLOG.md                # 宪法层 ⭐ 跟踪：待办排期
+├── decisions/
+│   ├── _INDEX.md             # 决策层 ⭐ 跟踪：索引表
+│   └── 006-v1.1-….md         # 决策层 ⭐ 跟踪：已确认决策
+└── .agents/                  # 个人层 ⛔ 不跟踪：每人一目录
+    ├── huang/
+    │   ├── context.md        # 当前任务上下文
+    │   └── scratchpad.md     # 探索草稿（不编号、随便改）
+    └── zhang/
+        ├── context.md
+        └── scratchpad.md
 ```
 
-决策序号在**晋升时刻**才认领；`_INDEX.md` 尾部冲突即报警，后合并者整体 +N。完整规则见 [`workflows/core-documents.md`](./skills/bootstrap-agent-workspace/workflows/core-documents.md) §6。
+| 层级 | 文件 | Git | AI 权限 |
+|---|---|---|---|
+| 宪法层 | `AGENTS.md`、`BACKLOG.md` | 跟踪 | 起草-确认制（可起草，人工 review 合并后生效） |
+| 决策层 | `decisions/` | 跟踪 | 起草-确认制；已确认决策不改写 |
+| 个人层 | `.agents/<成员>/` | 忽略 | 自由读写，成员间互不干扰 |
 
-详细入口：[`skills/bootstrap-agent-workspace/SKILL.md`](./skills/bootstrap-agent-workspace/SKILL.md)
+**起草-确认制**：AI 不是誊写员，也不是擅自改宪法的人——起草共享层变更，人点头合并才进 main。
+
+### 使用流程（示意）
+
+```text
+1. 初始化   bootstrap 选多人协同 → 确认成员名单 → 建 .agents/<你>/ 并 gitignore
+2. 日常     先读 AGENTS.md，再读 .agents/<你>/context.md；草稿写 scratchpad
+3. 决策晋升 结论验证通过后：
+            a. 读 main 最新 _INDEX.md 取 max+1，此刻才有序号，起草决策文件
+            b. 同 PR：追加索引行；教训类改动起草 AGENTS.md
+            c. 代码 + 决策一起提 PR；队友 review → 合并 = 确认生效
+4. 并发撞号 两人拿到同一序号也没关系：
+            _INDEX.md 尾部追加必然冲突 = 系统报警；
+            后合并者整体 +N（文件名 + 索引行 + 文内版本），纯机械操作
+```
+
+### 为什么这样分
+
+- **AGENTS.md 必须跟踪**：团队共识锚点；不跟踪会裂成多套灵魂文档  
+- **个人上下文必须忽略**：各人「当前任务」一旦入库，每次 pull 都是冲突  
+- **序号在晋升时刻才分配**：草稿不编号，批量晋升零牵连；索引尾部冲突是报警器不是故障  
+- **归属进元数据**：作者行 / 作者列；文件名只留给全局顺序  
+
+完整规则：[`workflows/core-documents.md`](./skills/bootstrap-agent-workspace/workflows/core-documents.md) §6。
 
 ---
 
-## spec-writing：契约怎么写到「拿去就能复刻」
+## 核心二（本轮）：路径成对钩子
 
-当项目需要文档先行、字段/接口/状态机必须钉死时启用。重点不是堆文档，而是：
+Agent 最常出的漂移往往不是字段对错，而是**单边改**：动了实现没动契约（或反过来）。路径成对是 **L0**：只看本轮 git dirty 两侧路径是否同现——不做函数级扫描，也不做行为证明。
 
-- **10 段强制结构** + **零自由发挥**（11 维钉死）
-- **落地前 15+2 自检**（含 Properties 两题）
-- **Properties（推荐）**：关键行为写成可判定的 ∀；覆盖矩阵可挂 `P-*` / `PT-*`
-- **Correctness 变更门**：写性质 ≠ 每次都跑测试；仅 dirty/diff 命中相关实现或性质正文时才跑对应 PT——适合借鉴到业务仓，**不必**做成 Skill 仓全仓强制 PBT
+| | 说明 |
+|---|---|
+| **何时跑** | 宿主「轮次 / 会话结束」类 hook（执行 Agent 按当前 Harness 注册） |
+| **装什么** | `tools/path_align_hooks/`（`drift_lite` + `turn_align`，ps1/sh） |
+| **产出** | JSON；有风险可 nudge（A1 补另一侧 / A2 说明故意单边） |
+| **套餐** | 「完整工具链」默认带；快速开始不带；自定义可单选 |
+| **Harness** | 模板无某工具专属 hooks 配置；Skill 不写分工具适配长文 |
+| **关掉催改** | `PATH_ALIGN_NUDGE=0` |
 
-入口：[`skills/spec-writing/SKILL.md`](./skills/spec-writing/SKILL.md)
+```powershell
+powershell -NoProfile -File tools/path_align_hooks/drift_lite.ps1
+```
+
+[`modules/path-align-hooks.md`](./skills/bootstrap-agent-workspace/modules/path-align-hooks.md) · [`templates/path_align_hooks/`](./skills/bootstrap-agent-workspace/templates/path_align_hooks/)
+
+> `drift-check`（D1–D6）偏 Python、需 Adapter，**不在默认套餐**；与路径成对分层，互不替代。
 
 ---
 
-## 真实案例：拼多多拉图工具
+## 初始化：先问诊，再开方
 
-[《拼多多拉图工具 vibecoding 全过程复盘》](./docs/case-study-pdd.md)：53 轮对话、25 条决策、层级 Spec、客户交付双击 exe。
+```text
+1. 问诊   读仓库证据，推断项目与协作模式（单人 / 多人）
+2. 选套餐
+          1. 快速开始：协作说明 + 决策目录 + 待办排期
+          2. 完整工具链：再加路径成对钩子
+          3. 自定义：自选模块（含可选 drift-check）
+3. 确认   汇报产物，点头才生成；已有文件默认增量升级
+4. 生成   只装选中模块
+```
 
-- 需求挤牙膏注入，靠 Spec 层级仍有落点  
-- 「为何 jimp 不 sharp」可在决策里溯源  
-- 多 Agent 并行覆盖文件——正是多人晋升 / 只追加要防的问题  
+单人模式：不建 `.agents/`；你仍是确认闸门。多人模式：见上文「核心一」。
+
+原生加载 `AGENTS.md` 的 Harness 开箱即用；Claude Code 额外 `CLAUDE.md` 薄入口。  
+入口：[`skills/bootstrap-agent-workspace/SKILL.md`](./skills/bootstrap-agent-workspace/SKILL.md)
+
+---
+
+## 配套 Skill
+
+| Skill | 用途 | 入口 |
+|---|---|---|
+| `spec-writing` | Spec 10 段 + 零自由发挥 + 落地前自检（可选 Properties 写法；本仓不强制 PBT） | [`SKILL.md`](./skills/spec-writing/SKILL.md) |
+| `task-handoff` | 长任务可验证交接 | [`SKILL.md`](./skills/task-handoff/SKILL.md) |
+
+---
+
+## 真实案例
+
+[《拼多多拉图工具 vibecoding 全过程复盘》](./docs/case-study-pdd.md)：决策可溯、Spec 层级接需求、多 Agent 并行覆盖文件——正是多人协同（晋升 / 只追加）与契约纪律要防的问题。
 
 ---
 
 ## 安装与发布
-
-复制到宿主 Skills 目录即可，例如：
 
 ```text
 <skills-root>/bootstrap-agent-workspace/
@@ -119,9 +133,7 @@ project/
 <skills-root>/spec-writing/
 ```
 
-- 目录名 = `SKILL.md` frontmatter `name`
-- 每个 Skill 自包含，不依赖相邻 Skill 或根目录运行时
-- 根目录不放 `SKILL.md`
+目录名 = frontmatter `name`；Skill 自包含；根目录不放 `SKILL.md`。
 
 ## License
 
