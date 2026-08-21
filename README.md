@@ -125,6 +125,19 @@ project/
 
 完整规则见 [`workflows/core-documents.md`](./skills/bootstrap-agent-workspace/workflows/core-documents.md) §6。
 
+### 真实案例：拼多多拉图工具
+
+这套体系不是纸上谈兵——[《拼多多拉图工具 vibecoding 全过程复盘》](./docs/case-study-pdd.md)还原了一个真实项目从「拉个开源项目」到「交付单文件 exe」的全程：53 轮对话、25 条决策记录、36 个 Spec 文件、30 条单测，最后客户拿到的是一个双击即用的 exe，全程零命令。
+
+几个最有说服力的瞬间：
+
+- **需求挤牙膏式注入，架构接得住**：用户从没给过完整需求文档，中途还有「忘了，还有一个最重要的功能」——靠层级 Spec 体系，每个新需求都有明确落点
+- **决策全程可溯**：「为什么用 jimp 不用 sharp」这种问题，翻决策日志 v1.1 就有答案（sharp 不支持 BMP，实测淘汰）
+- **踩坑变资产**：Windows detached 进程无法 COM 交互这种环境深坑，沉淀为 lessons-learned，下次直接绕开
+- **多 Agent 冲突实战**：两个 Agent 并行改同一批 Spec 文件发生覆盖——这正是多人协同模式（决策晋升 + 只追加不重写）要解决的问题
+
+详见 [`docs/case-study-pdd.md`](./docs/case-study-pdd.md)。
+
 ## 配套 Skill
 
 | Skill | 用途 | 入口 |
