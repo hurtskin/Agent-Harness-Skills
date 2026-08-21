@@ -161,3 +161,7 @@ project/
 - 每个 Skill 必须自包含，不能依赖相邻 Skill 或仓库根目录中的运行时文件。
 - 发布单个 Skill 时，只打包对应的 `skills/<name>/` 目录。
 - 仓库根目录不放 `SKILL.md`，避免被识别为额外 Skill 或产生重复入口。
+
+## License
+
+[MIT](./LICENSE)
