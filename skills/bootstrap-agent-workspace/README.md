@@ -1,19 +1,20 @@
 # Bootstrap Agent Workspace
 
-面向主流 Hermes 编程工具的 AI Agent 工作区初始化 Skill。它将激活路由、跨工具公共规则、客户端适配和可选工具拆分为独立文档，只加载本次真正需要的部分。
+面向主流 Agent Harness 的 AI Agent 工作区初始化 Skill。它将激活路由、跨工具公共规则、客户端适配和可选工具拆分为独立文档，只加载本次真正需要的部分。
 
-支持 Trae、Claude Code、Codex、OpenCode、Pi、Qoder 和 ZCoder。Trae 是基线实现，所有客户端共享一套项目事实；changelog-rag 与 drift-check 共享项目 `tools/` 下的同一套 Python 环境。
+所有原生加载项目根 `AGENTS.md` 的 Agent Harness（Trae、Codex、OpenCode、Pi、Qoder 等）开箱即用；Claude Code 额外生成 `CLAUDE.md` 薄入口。协作原则、安全红线与踩坑教训并入 `AGENTS.md` 唯一 P0 事实源，决策记录采用 `decisions/` 目录（一决策一文件 + `_INDEX.md` 索引），换工具零迁移；drift-check 使用项目 `tools/` 下的共享 Python 环境。
 
 ## 核心特性
 
 - `SKILL.md` 只负责激活、工具识别、模块询问和文档路由
 - `COMMON.md` 维护跨工具公共流程、单一事实源和产物门禁
-- 每个 Hermes 客户端使用独立适配器，避免把所有实现一次性加载
-- 核心文档、排期、changelog-rag、drift-check 均可独立选择
+- 所有原生加载 `AGENTS.md` 的工具零适配；仅 Claude Code 有独立适配器（`CLAUDE.md` 入口差异）
+- 支持单人 / 多人协同：多人时共享宪法 Git 跟踪 + `.agents/` 个人层不跟踪 + 决策晋升流程（草稿无号 → 晋升认领序号 → 人工 review 合并）
+- 核心文档、排期、drift-check 均可独立选择
 - 未选模块不加载、不生成、不安装依赖，也不注入规则
 - 已有文件默认增量升级，覆盖或重建必须得到明确授权
 - 客户端入口只保存索引和必要差异，不复制完整公共事实
-- 初始化完成后的日常上下文按 P0 / P1 / P2 分级加载，历史与教训默认按需读取
+- 初始化完成后的日常上下文按 P0 / P1 / P2 分级加载：AGENTS.md 唯一常驻，决策历史默认按需读取
 - 分级加载不改变初始化阶段的模块按需路由，也不改变现有公共事实源路径
 - 两个 Python 工具共享唯一的 `tools/.venv` 和 `tools/uv.lock`
 
@@ -22,12 +23,12 @@
 在目标项目根目录表达以下意图即可：
 
 - `初始化工作区`
-- `生成灵魂文档`
-- `配三件套`
+- `生成协作准则`
+- `配 AGENTS`
 - `bootstrap`
 - `配 agent`
 - `多工具兼容`
-- `Hermes 兼容`
+- `harness 兼容`
 
 也可以直接说：
 
@@ -40,7 +41,7 @@
 ```text
 SKILL.md
 ├── COMMON.md
-├── adapters/<当前客户端>.md
+├── adapters/claude-code.md           仅当前工具为 Claude Code 时
 ├── 首屏按目的选择场景套餐
 │   ├── 快速开始（推荐）
 │   ├── 规范治理（适合长期项目）
@@ -48,18 +49,16 @@ SKILL.md
 │   └── 自定义能力 → 再显示技术模块多选
 ├── workflows/core-documents.md      套餐映射或自定义选中核心文档时
 ├── modules/kanban.md                套餐映射或自定义选中排期时
-├── modules/changelog-rag.md         套餐映射或自定义选中 changelog-rag 时
-├── modules/drift-check.md           套餐映射或自定义选中 drift-check 时
+├── modules/drift-check.md            套餐映射或自定义选中 drift-check 时
 ├── modules/python-workspace.md      选中任一 Python 工具时
 └── workflows/verification.md        最后按确认范围验收
 ```
 
-首次引导先询问用户想达到什么效果，首屏不要求理解 changelog、RAG、drift 等术语：
+首次引导先询问用户想达到什么效果，首屏不要求理解 drift 等术语：
 
-1. **快速开始（推荐）**：建立项目协作说明和待办排期，马上开始推进工作。
-2. **规范治理（适合长期项目）**：在快速开始基础上，让重要历史决定之后能快速查到。
-3. **完整工具链（适合大型协作）**：在规范治理基础上，持续检查规范、任务和代码是否一致。此项仅适合已有 Spec / 文档驱动协作的项目，不是普通小项目的默认选择。
-4. **自定义能力**：自行组合具体能力，此时才显示原有技术模块多选。
+1. **快速开始（推荐）**：建立项目协作说明、决策目录和待办排期，马上开始推进工作。
+2. **完整工具链（适合大型协作）**：在快速开始基础上，持续检查规范、任务与代码是否一致。此项仅适合已有 Spec / 文档驱动协作的项目，不是普通小项目的默认选择。
+3. **自定义能力**：自行组合具体能力，此时才显示原有技术模块多选。
 
 确认前会汇报所选套餐、对应技术模块、将加载的文档和将生成的产物；完整工具链会再次提示一致性检查的适用前提。未选择的模块不会参与执行。
 
@@ -68,21 +67,19 @@ SKILL.md
 | 场景套餐 | 技术模块 |
 |---|---|
 | 快速开始（推荐） | 核心工作区文档 + 排期清单 |
-| 规范治理（适合长期项目） | 核心工作区文档 + 排期清单 + changelog-rag |
-| 完整工具链（适合大型协作） | 核心工作区文档 + 排期清单 + changelog-rag + drift-check |
-| 自定义能力 | 进入核心工作区文档、排期清单、changelog-rag、drift-check 原有多选 |
+| 完整工具链（适合大型协作） | 核心工作区文档 + 排期清单 + drift-check |
+| 自定义能力 | 进入核心工作区文档、排期清单、drift-check 原有多选 |
 
 技术模块名在确认清单或自定义入口中展示。`drift-check` 仅适用于已有 Spec / 文档驱动协作、需要持续检查文档与实现一致性的项目，避免将完整工具链误导为普通小项目的默认方案。
 
 | 选择 | 加载文档 | 主要产物 |
 |---|---|---|
-| 核心工作区文档 | `workflows/core-documents.md` | soul、`AGENTS.md`、决策日志、lessons |
-| 排期清单 | `modules/kanban.md` | `排期清单.md` |
-| changelog-rag | `modules/changelog-rag.md` | `tools/changelog_rag/` 和当前客户端 MCP 配置 |
+| 核心工作区文档 | `workflows/core-documents.md` | `AGENTS.md`（含协作原则/红线/踩坑教训）、`decisions/` 目录 |
+| 排期清单 | `modules/kanban.md` | `BACKLOG.md` |
 | drift-check | `modules/drift-check.md` | `tools/drift_check/` |
-| 任一 Python 工具 | `modules/python-workspace.md` | `tools/pyproject.toml`、`tools/.venv`、`tools/uv.lock` |
+| drift-check | `modules/python-workspace.md` | `tools/pyproject.toml`、`tools/.venv`、`tools/uv.lock` |
 
-核心文档不是其他模块的强制前置条件。例如仅选择 changelog-rag 时，不会为了登记适配状态而创建 `AGENTS.md`。如果默认数据源 `决策日志.md` 不存在，Skill 会要求补选核心文档、提供其他已有日志路径或取消该模块。
+核心文档不是 drift-check 的强制前置条件。例如仅选择 drift-check 时，不会为了登记适配状态而创建 `AGENTS.md`。
 
 ## 单一事实源
 
@@ -90,19 +87,31 @@ SKILL.md
 
 | 文件 | 职责 |
 |---|---|
-| `AGENTS.md` | 短导航与当前工作入口：最小项目定位、当前任务、命令和 Spec ↔ Code / 事实源索引 |
-| `.trae/rules/soul.md` | 必须常驻的稳定原则与安全红线；路径为历史兼容名称，不代表仅供 Trae 使用 |
-| `决策日志.md` | 追加式项目决策历史，由 RAG 或关键词局部读取按需检索 |
-| `排期清单.md` | 仅保存未完成事项，完成后移除并将闭环写入决策日志 |
-| `.trae/rules/lessons-learned.md` | 跨任务通用教训，append-only，默认按需读取 |
+| `AGENTS.md` | P0 唯一常驻事实源：短导航与当前入口、协作原则、安全红线、踩坑教训；顶部锚点目录跳转，所有 Agent Harness 原生加载 |
+| `decisions/` | P2 决策目录：一决策一文件（`序号-版本-关键词.md`），`_INDEX.md` 是唯一索引表；文件系统即索引，追溯时按关键词定位后局部读取 |
+| `BACKLOG.md` | 仅保存未完成事项，完成后移除；闭环在 `decisions/` 新建决策文件并追加索引行 |
 
-执行适配器前会形成：
+协作原则与教训不建独立文件（旧体系的 `soul.md`、`lessons-learned.md` 按核心文档流程迁移并入 `AGENTS.md`）。
+
+生成或升级工具入口（如 `CLAUDE.md`）前会形成：
 
 - `existing_artifacts`：项目中已经存在的产物
 - `selected_artifacts`：本次所选模块将生成或升级的产物
 - `available_artifacts`：两者并集
 
-适配器只能引用 `available_artifacts`，不得自行创建缺失的公共核心文档，也不得留下失效引用。
+工具入口只能引用 `available_artifacts`，不得自行创建缺失的公共核心文档，也不得留下失效引用。
+
+## 多人协同
+
+初始化时确认协作模式（单人 / 多人协同）并写入 `AGENTS.md` 项目定位。多人协同采用「共享宪法 + 个人上下文」三层结构：
+
+| 层级 | 文件 | Git | AI 权限 |
+|---|---|---|---|
+| 宪法层 | `AGENTS.md`、`BACKLOG.md` | 跟踪 | 起草-确认制：AI 可起草修改，经人工 review 合并后生效 |
+| 决策层 | `decisions/` | 跟踪 | 起草-确认制；已确认决策不改写 |
+| 个人层 | `.agents/<成员>/`（context.md + scratchpad.md） | 忽略 | 自由读写，成员间互不干扰 |
+
+决策序号在晋升时刻分配（读 `_INDEX.md` 取 max+1，序号 ↔ vN 一一对应）；草稿阶段不编号。并发晋升时 `_INDEX.md` 尾部追加必然冲突——冲突即报警，后合并者整体 +N 改号，纯机械操作。完整规则见 `workflows/core-documents.md` §6。
 
 ## 运行时分级加载
 
@@ -110,93 +119,32 @@ SKILL.md
 
 | 级别 | 用途 | 默认内容 |
 |---|---|---|
-| P0 / Always | 每次会话立即可见的稳定原则和当前入口 | 精简 soul、短 `AGENTS.md` |
+| P0 / Always | 每次会话立即可见的稳定原则、踩坑教训和当前入口 | `AGENTS.md`（唯一常驻事实源） |
 | P1 / Indexed | 按任务相关性定位的工作上下文 | 活跃 Spec、架构/数据流文档、排期和条件规则 |
-| P2 / On-demand | 排障、追溯或主题命中时局部读取 | `决策日志.md`、lessons、归档 Spec |
+| P2 / On-demand | 排障、追溯或主题命中时局部读取 | `decisions/`（入口 `_INDEX.md`）、归档 Spec |
 
 支持原生引用或条件规则的客户端可据实映射；能力不明时使用薄入口 + 路径索引，不宣称客户端具备未确认能力。同一事实源只保留一条默认自动加载路径，例如客户端原生加载 `AGENTS.md` 后，不再通过配置重复导入。冲突依次服从客户端不可绕过约束、项目安全红线、当前已确认 Spec/任务约束、索引与历史；无法消解时询问用户。
 
-## Hermes 工具适配
+## Agent Harness 适配
 
-| 工具 | 适配器 | 默认入口 |
+所有原生加载项目根 `AGENTS.md` 的工具共用同一入口，零适配：
+
+| 工具 | 是否需要适配器 | 入口 |
 |---|---|---|
-| Trae | `adapters/trae.md` | `.trae/rules/*.md` 和 `AGENTS.md` |
-| Claude Code | `adapters/claude-code.md` | `CLAUDE.md` / `.claude/CLAUDE.md` |
-| Codex | `adapters/codex.md` | `AGENTS.md` |
-| OpenCode | `adapters/opencode.md` | `AGENTS.md` / `opencode.json` |
-| Pi | `adapters/pi.md` | `AGENTS.md`，可选 `.pi/SYSTEM.md` / `.pi/APPEND_SYSTEM.md` |
-| Qoder | `adapters/qoder.md` | 解析 `context.fileName`，默认 `AGENTS.md` |
-| ZCoder | `adapters/zcoder.md` | 实现不统一，必须检测或询问 |
+| Trae、Codex、OpenCode、Pi、Qoder 等原生加载 `AGENTS.md` 的工具 | 否 | `AGENTS.md` |
+| Claude Code | 是：[`adapters/claude-code.md`](adapters/claude-code.md) | `CLAUDE.md` / `.claude/CLAUDE.md`（`@AGENTS.md` 导入） |
 
-同一项目可以同时启用多个适配器，但仍共享上述公共事实源。只有 `AGENTS.md` 已存在或本次将生成时，才向其中写入“Agent 工具适配”表；否则只在执行结果中报告适配状态。
-
-### 新增适配器
-
-新增正式支持的 Hermes 工具时，以 [`adapters/adapter-template.example.md`](adapters/adapter-template.example.md) 为结构起点。该文件只是示例，不参与运行时路由，也不要直接加入正式适配器注册表。
-
-#### 1. 先确认客户端能力
-
-在编写适配器前，基于官方文档、本地配置或运行时证据确认：
-
-- 准确产品名、版本和专属检测信号；只有通用 `AGENTS.md` 时不得反推具体工具。
-- 自动加载文件或目录、继承/覆盖优先级，以及是否支持 Markdown 引用。
-- 是否支持条件规则、MCP 和结构化配置；能力不明时必须询问，不得猜测。
-
-#### 2. 创建适配器文件
-
-复制示例为 `adapters/<tool-slug>.md`，删除占位说明并填写真实行为。正式适配器至少保留以下二级章节：
-
-- `检测信号`
-- `官方入口` 或 `自动加载入口`
-- `生成策略`
-- `校验`
-
-推荐同时保留 `定位` 和 `兼容边界`。即使客户端没有统一入口，也应在“官方入口”中说明必须依据运行时证据或用户确认，不要省略章节或增加按工具名判断的自检特例。
-
-生成策略必须遵守 `available_artifacts` 门禁：适配器只处理客户端原生入口和配置，不自行创建公共核心文档；P0 保持精简，P1 只索引或条件加载，P2 不进入无条件自动加载链；同一事实源只保留一条默认自动加载路径。
-
-#### 3. 注册正式支持
-
-新增文件本身不会自动注册。必须同步更新：
-
-1. `SKILL.md` frontmatter 中的支持工具描述和“工具适配器索引”。
-2. 本 README 的支持工具说明、适配器表和目录树。
-3. 仓库根 `README.md` 中 `bootstrap-agent-workspace` 的支持工具描述。
-4. `scripts/self_check.py` 的 `ADAPTERS` 元组，使缺失文件和章节结构进入自检。
-5. `tests/test_self_check.py`，至少覆盖缺失适配器、缺失必备章节和未注册孤儿文件。
-
-#### 4. 按需增加配置模板
-
-仅复用 `AGENTS.md` 或 Markdown 薄入口时，不需要配置模板。只有客户端具有稳定原生格式且本 Skill 承诺生成 MCP 或机器配置时，才新增 `templates/config/<tool>-*.template`，并同步：
-
-- `modules/changelog-rag.md` 中的客户端生成分支；
-- `workflows/verification.md` 中的格式和合并验收；
-- `scripts/self_check.py` 的 `REQUIRED_FILES`；
-- README 配置说明和对应自动测试。
-
-修改已有配置必须增量合并，保留未知字段、注释和原有格式。changelog-rag 数据源默认指向 `决策日志.md`，并通过共享 `tools/` workspace 启动。
-
-#### 5. 验证
-
-在仓库根目录执行：
-
-```powershell
-uv run --no-project python skills/bootstrap-agent-workspace/scripts/self_check.py
-uv run --no-project python -m unittest discover -s skills/bootstrap-agent-workspace/tests -v
-```
-
-如增加了客户端配置模板，再验证模板语法、占位符、数据源路径和增量合并结果；如增加可执行实现，将对应测试加入 CI。
+无法确定工具或自动加载入口时，询问用户；只有 `AGENTS.md` 已存在或本次将生成时，才向其中写入“Agent 工具适配”表，否则只在执行结果中报告适配状态。同一项目多工具使用时共享 `AGENTS.md` 事实源，Claude Code 额外生成薄入口。
 
 ## 共享 Python Workspace
 
-changelog-rag 和 drift-check 使用同一个 uv workspace：
+drift-check 使用 uv workspace：
 
 ```text
 tools/
 ├── pyproject.toml
 ├── uv.lock
 ├── .venv/
-├── changelog_rag/
 └── drift_check/
 ```
 
@@ -205,35 +153,11 @@ tools/
 ```powershell
 Set-Location "tools"
 uv sync --all-packages --all-extras
-uv run pytest changelog_rag/tests
 uv run pytest drift_check/tests
 uv run drift-check scan --project-root ..
 ```
 
-只选择一个工具时，workspace 只包含该成员。后续增加第二个工具时更新 members 并同步现有环境，不创建成员级 `.venv` 或第二个锁文件。
-
-## changelog-rag MCP
-
-changelog-rag 以 stdio MCP Server 运行，数据源默认是项目根 `决策日志.md`，也可以使用用户确认的其他决策日志绝对路径。
-
-### Trae
-
-使用 `templates/config/mcp-config.json.template` 生成项目 `.trae/mcp-config.json`。
-
-### OpenCode
-
-使用 `templates/config/opencode-changelog-rag.json.template`，将 `mcp.changelog-rag` 增量合并到项目根已有的 `opencode.json` 或 `opencode.jsonc`；两者都不存在时创建 `opencode.json`。
-
-OpenCode 配置采用原生格式：
-
-- `mcp.changelog-rag.type` 为 `local`
-- `command` 是包含可执行文件和参数的单一数组
-- `environment.CHANGELOG_RAG_AGENTS_MD` 指向实际数据源
-- 已有配置字段、注释和 JSON/JSONC 格式必须保留
-
-可直接参考 `templates/config/opencode.json.example`。应用前将示例中的 `C:/path/to/your-project` 替换为项目绝对路径。如果项目已有 OpenCode 配置，只合并 `mcp.changelog-rag` 节点，不要覆盖整个文件。
-
-修改 MCP Server 源码或配置后，需要重启对应客户端的 MCP Server。
+后续增加第二个 Python 工具时更新 members 并同步现有环境，不创建成员级 `.venv` 或第二个锁文件。
 
 ## 文档先行边界
 
@@ -246,7 +170,7 @@ OpenCode 配置采用原生格式：
 5. 运行所选范围的验证。
 6. 只回写 `available_artifacts` 中与本次变更相关的文档。
 
-按已确认模块流程复制或安装 changelog-rag、drift-check 工具模板时，不要求补建未选核心文档。如果工具初始化同时改变项目接口、架构或运行行为，相关项目变更部分仍执行文档先行流程。
+按已确认模块流程复制或安装 drift-check 工具模板时，不要求补建未选核心文档。如果工具初始化同时改变项目接口、架构或运行行为，相关项目变更部分仍执行文档先行流程。
 
 ## 验收规则
 
@@ -255,11 +179,9 @@ OpenCode 配置采用原生格式：
 - 未选模块没有残留配置、依赖或强制规则
 - `AGENTS.md` 可用时检查工具适配表，否则检查执行结果中的适配报告
 - 所有入口和相对路径有效，P0 保持精简，P1/P2 读取条件清楚
-- 决策日志、lessons 和归档内容未进入无条件自动加载链
+- decisions/ 和归档内容未进入无条件自动加载链；协作原则、红线与教训都在 `AGENTS.md` 内，无独立副本
 - 同一公共事实源没有通过原生入口、引用或配置重复自动加载
 - Python 工具共享唯一 workspace、虚拟环境和锁文件
-- changelog-rag 使用当前客户端原生 MCP 格式，数据源实际存在
-- OpenCode 的 `mcp.changelog-rag` 使用 `local` 类型和单一 `command` 数组
 
 因缺少未选公共产物而主动跳过客户端入口，不判为失败。
 
@@ -271,31 +193,18 @@ bootstrap-agent-workspace/
 ├── COMMON.md
 ├── README.md
 ├── adapters/
-│   ├── adapter-template.example.md
-│   ├── trae.md
-│   ├── claude-code.md
-│   ├── codex.md
-│   ├── opencode.md
-│   ├── pi.md
-│   ├── qoder.md
-│   └── zcoder.md
+│   └── claude-code.md
 ├── workflows/
 │   ├── core-documents.md
 │   └── verification.md
 ├── modules/
 │   ├── kanban.md
-│   ├── changelog-rag.md
 │   ├── drift-check.md
 │   └── python-workspace.md
 └── templates/
     ├── tools/pyproject.toml.template
-    ├── changelog_rag/
     ├── drift_check/
-    ├── kanban/排期清单.md.template
-    └── config/
-        ├── mcp-config.json.template
-        ├── opencode-changelog-rag.json.template
-        └── opencode.json.example
+    └── kanban/BACKLOG.md.template
 ```
 
 ## 环境要求
@@ -304,7 +213,6 @@ bootstrap-agent-workspace/
 
 - Python 3.10+
 - `uv`
-- 首次准备 changelog-rag 语义模型时可访问模型源，或本地已经缓存模型
 
 支持在 Windows PowerShell 环境执行模板复制、依赖同步和验证。
 
@@ -312,11 +220,9 @@ bootstrap-agent-workspace/
 
 已有文件默认升级，只补缺失内容。适合以下场景：
 
-- 将旧版工作区文档迁移到单一事实源结构
-- 将项目决策从自动加载入口分离到 `决策日志.md`
+- 将旧版工作区文档迁移到单一事实源结构（含旧体系 `soul.md` / `lessons-learned.md` 并入 `AGENTS.md`，单文件 `决策日志.md` 拆分为 `decisions/` 目录）
 - 为现有项目增加客户端薄入口
-- 接入 changelog-rag、drift-check 或共享 Python workspace
-- 为现有 OpenCode 配置增量加入 changelog-rag MCP
+- 接入 drift-check 或共享 Python workspace
 
 重建或覆盖任何已有文件前必须获得用户明确授权。
 
@@ -327,6 +233,5 @@ bootstrap-agent-workspace/
 - `workflows/core-documents.md`：核心工作区文档生成流程
 - `workflows/verification.md`：按选择范围验收
 - `modules/*.md`：可选模块实现
-- `adapters/*.md`：Hermes 客户端差异
-- `templates/changelog_rag/README.md`：changelog-rag 实现说明
+- `adapters/claude-code.md`：Claude Code 的 `CLAUDE.md` 入口差异
 - `templates/drift_check/README.md`：drift-check 实现说明

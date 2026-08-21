@@ -12,28 +12,27 @@
 
 ## 核心文档（选择时）
 
-- [ ] soul、AGENTS、决策日志、lessons 职责不重叠
+- [ ] `AGENTS.md` 章节结构完整且顺序正确：目录锚点、项目定位、当前入口、真实验证命令、协作原则、红线、（多人协作——仅多人协同模式）、踩坑教训、P1/P2 索引、文档职责、Agent 工具适配、变更日志
+- [ ] 目录锚点链接全部指向文内章节，无失效锚点
+- [ ] 项目定位章节含协作模式标记（单人 / 多人协同），与项目识别阶段的确认结果一致
+- [ ] decisions/ 目录含 `_INDEX.md` 索引表和 `001-v1-init-*.md` 首条决策；文件命名符合 `序号-版本-关键词.md`，索引行含版本、关键词、状态、相关模块；序号无重复且与版本号一一对应
+- [ ] 多人协同模式：`.agents/<当前成员>/` 含 context.md 与 scratchpad.md 骨架；`.gitignore` 含 `.agents/`；AGENTS.md 项目定位列出成员名单，多人协作章节存在；决策文件含「作者」行且 `_INDEX.md` 含作者列
+- [ ] 单人模式：无 `.agents/` 目录与多人协作章节
+- [ ] AGENTS、decisions、排期职责不重叠；协作原则、红线与踩坑教训都在 `AGENTS.md` 内，无独立 soul / lessons 文件
+- [ ] 存在旧体系 `.trae/rules/soul.md` / `lessons-learned.md` 时，已按迁移流程并入 `AGENTS.md` 并经授权删除，无残留引用
 - [ ] 工具入口只索引公共事实
 - [ ] 文档中的工具说明与实际选择一致
 
-## 排期（选择时）
+## BACKLOG / 排期清单（选择时）
 
 - [ ] 只包含未完成项
-- [ ] 闭环规则指向决策日志
+- [ ] 闭环规则指向 decisions/（新建决策文件 + `_INDEX.md` 追加索引行）
 
-## Python workspace（任一工具选择时）
+## Python workspace（drift-check 选择时）
 
-- [ ] `tools/pyproject.toml` members 与实际目录一致
+- [ ] `tools/pyproject.toml` members 与实际目录一致（仅 `drift_check`）
 - [ ] 仅存在 `tools/.venv` 和 `tools/uv.lock`
 - [ ] 所有安装、测试和运行命令从 `tools/` 执行
-
-## changelog-rag（选择时）
-
-- [ ] MCP 中配置的数据源文件实际存在，且默认数据源为 `决策日志.md`
-- [ ] 数据源不存在时已补选核心文档、提供有效替代路径或取消模块
-- [ ] MCP 配置使用当前客户端原生格式，并使用 `uv --directory <PROJECT_ROOT>/tools run`
-- [ ] OpenCode 使用项目根 `opencode.json/jsonc` 的 `mcp.changelog-rag`，`type` 为 `local` 且 `command` 为单一数组；已有配置的其他字段与 JSON/JSONC 格式未被覆盖
-- [ ] `uv run pytest changelog_rag/tests` 通过
 
 ## drift-check（选择时）
 

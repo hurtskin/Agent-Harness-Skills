@@ -51,7 +51,7 @@ class SelfCheckTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         skill = root / "SKILL.md"
         skill.write_text(
-            skill.read_text(encoding="utf-8").replace("、`排期清单.md`", ""),
+            skill.read_text(encoding="utf-8").replace("、`BACKLOG.md`", ""),
             encoding="utf-8",
         )
 
@@ -78,16 +78,6 @@ class SelfCheckTests(unittest.TestCase):
 
         self.assertEqual(("utf-8", "backslashreplace"), stdout.configured)
         self.assertEqual(("utf-8", "backslashreplace"), stderr.configured)
-
-    def test_changelog_agents_md_description_is_reported(self) -> None:
-        temporary, root = self.copy_skill()
-        self.addCleanup(temporary.cleanup)
-        readme = root / "templates" / "changelog_rag" / "README.md"
-        readme.write_text("semantic retrieval over `AGENTS.md` decision changelog\n", encoding="utf-8")
-
-        errors = self_check.check_changelog_source_descriptions(root)
-
-        self.assertTrue(any("README.md" in error for error in errors))
 
 
 if __name__ == "__main__":

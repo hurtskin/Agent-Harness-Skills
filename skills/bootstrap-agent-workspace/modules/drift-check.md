@@ -36,6 +36,8 @@ uv run drift-check list-detectors
 
 未选择核心文档时，仅生成工具，不修改其他项目规则。
 
+D5 教训锚点检测的扫描源与锚点格式由 Adapter 定义（`lesson_refs_file()` / `parse_lesson_refs()` / `decision_log_file()`）：模板自带的 `asset_radar` 示例面向旧体系（扫描 `.trae/rules/soul.md`、`决策日志.md`，锚点是 `lessons-learned.md` 的 `§XX`）。新体系项目应在自定义 Adapter 中改写：锚点文件指向 `AGENTS.md` 的踩坑教训章节（`L-NNN` 编号），扫描源覆盖 `AGENTS.md`、`specs/**/*.md` 与 `decisions/*.md`；`decision_log_file()` 返回 `None` 或指向单个高价值决策文件均可。
+
 ## 约束
 
 - 不在 `tools/drift_check/` 执行 `uv sync`。

@@ -1,13 +1,14 @@
-# Hermes Agent Skills
+# Agent Harness Skills
 
-面向 Trae 与主流 Hermes 编程工具的可独立发布 Skills 集合。仓库根目录只负责索引；每个 `skills/<name>/` 目录都是自包含发布单元。
+面向 Trae 与主流 Agent Harness 的可独立发布 Skills 集合。仓库根目录只负责索引；每个 `skills/<name>/` 目录都是自包含发布单元。
 
 ## Skills
 
 | Skill | 用途 | 入口 |
 |---|---|---|
-| `bootstrap-agent-workspace` | 初始化跨 Trae、Claude Code、Codex、OpenCode、Pi、Qoder、ZCoder 的 Agent 工作区，可选 changelog-rag 与 drift-check | [`skills/bootstrap-agent-workspace/SKILL.md`](./skills/bootstrap-agent-workspace/SKILL.md) |
+| `bootstrap-agent-workspace` | 初始化 Agent 工作区：`AGENTS.md` 唯一 P0 事实源 + `decisions/` 决策目录（一决策一文件 + `_INDEX.md` 索引），所有原生加载它的 Agent Harness 开箱即用，Claude Code 额外生成 `CLAUDE.md` 薄入口；可选 drift-check | [`skills/bootstrap-agent-workspace/SKILL.md`](./skills/bootstrap-agent-workspace/SKILL.md) |
 | `task-handoff` | 通过接任子代理审计当前任务上下文，生成可验证的任务交接包 | [`skills/task-handoff/SKILL.md`](./skills/task-handoff/SKILL.md) |
+| `spec-writing` | Spec 文档编写规范：10 段强制结构 + 零自由发挥约束 + 落地前 15 题自检 | [`skills/spec-writing/SKILL.md`](./skills/spec-writing/SKILL.md) |
 
 ## 目录结构
 
@@ -22,7 +23,10 @@
 │   │   ├── modules/
 │   │   ├── workflows/
 │   │   └── templates/
-│   └── task-handoff/
+│   ├── task-handoff/
+│   │   ├── SKILL.md
+│   │   └── README.md
+│   └── spec-writing/
 │       ├── SKILL.md
 │       └── README.md
 ```
@@ -41,6 +45,7 @@
 ```text
 <skills-root>/bootstrap-agent-workspace/SKILL.md
 <skills-root>/task-handoff/SKILL.md
+<skills-root>/spec-writing/SKILL.md
 ```
 
 具体能力和使用方式请阅读各 Skill 自己的 `SKILL.md` 或 README。

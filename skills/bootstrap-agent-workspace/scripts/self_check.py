@@ -17,40 +17,26 @@ REQUIRED_FILES = (
     "workflows/core-documents.md",
     "workflows/verification.md",
     "modules/kanban.md",
-    "modules/changelog-rag.md",
     "modules/drift-check.md",
     "modules/python-workspace.md",
-    "templates/kanban/排期清单.md.template",
+    "templates/kanban/BACKLOG.md.template",
     "templates/tools/pyproject.toml.template",
-    "templates/config/mcp-config.json.template",
-    "templates/config/opencode-changelog-rag.json.template",
-    "templates/changelog_rag/pyproject.toml",
-    "templates/changelog_rag/src/changelog_rag/core.py",
-    "templates/changelog_rag/src/changelog_rag/server.py",
-    "templates/changelog_rag/tests/test_core.py",
     "templates/drift_check/pyproject.toml",
     "templates/drift_check/src/drift_check/cli.py",
     "templates/drift_check/src/drift_check/adapters/base.py",
     "templates/drift_check/src/drift_check/detectors/common.py",
     "templates/drift_check/tests/test_d1_version.py",
 )
-ADAPTERS = ("trae", "claude-code", "codex", "opencode", "pi", "qoder", "zcoder")
-MODULES = ("kanban", "changelog-rag", "drift-check", "python-workspace")
+ADAPTERS = ("claude-code",)
+MODULES = ("kanban", "drift-check", "python-workspace")
 ADAPTER_HEADINGS = ("检测信号", "生成策略", "校验")
 FACT_SOURCES = {
     "AGENTS.md",
-    "决策日志.md",
-    "排期清单.md",
-    ".trae/rules/soul.md",
-    ".trae/rules/lessons-learned.md",
+    "decisions/",
+    "BACKLOG.md",
 }
 LINK_RE = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
 BACKTICK_RE = re.compile(r"`([^`]+)`")
-FORBIDDEN_CHANGELOG_DESCRIPTIONS = (
-    re.compile(r"semantic retrieval over\s+`?AGENTS\.md`?", re.IGNORECASE),
-    re.compile(r"decision changelog[^\n]*`?AGENTS\.md`?", re.IGNORECASE),
-    re.compile(r"entire\s+`?AGENTS\.md`?", re.IGNORECASE),
-)
 
 
 def read_text(path: Path) -> str:
@@ -142,32 +128,12 @@ def check_fact_sources(root: Path) -> list[str]:
     return errors
 
 
-def check_changelog_source_descriptions(root: Path) -> list[str]:
-    errors: list[str] = []
-    template_root = root / "templates" / "changelog_rag"
-    for path in sorted(template_root.rglob("*")):
-        if (
-            not path.is_file()
-            or not is_source_file(path, root)
-            or path.suffix.lower() not in {".md", ".toml", ".py"}
-        ):
-            continue
-        text = read_text(path)
-        for pattern in FORBIDDEN_CHANGELOG_DESCRIPTIONS:
-            if pattern.search(text):
-                shown = path.relative_to(root).as_posix()
-                errors.append(f"changelog-rag 数据源被误写为 AGENTS.md: {shown}")
-                break
-    return errors
-
-
 def validate(root: Path) -> list[str]:
     checks = (
         check_required_files,
         check_markdown_links,
         check_structure,
         check_fact_sources,
-        check_changelog_source_descriptions,
     )
     errors: list[str] = []
     for check in checks:

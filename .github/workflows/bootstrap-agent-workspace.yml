@@ -27,11 +27,6 @@ jobs:
         run: uv run --no-project python skills/bootstrap-agent-workspace/scripts/self_check.py
       - name: Test workspace self-check
         run: uv run --no-project python -m unittest discover -s skills/bootstrap-agent-workspace/tests -v
-      - name: Test changelog-rag template (offline-safe cases)
-        run: >-
-          uv run --project skills/bootstrap-agent-workspace/templates/changelog_rag --extra dev
-          pytest skills/bootstrap-agent-workspace/templates/changelog_rag/tests/test_core.py
-          -k "parse or latest_version or append_entry or update_entry or delete_entry"
       - name: Test drift-check template
         run: >-
           uv run --project skills/bootstrap-agent-workspace/templates/drift_check --extra dev
