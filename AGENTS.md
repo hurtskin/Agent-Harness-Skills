@@ -44,6 +44,7 @@ uv run --no-project python scripts/check_links.py
 uv run --no-project python skills/bootstrap-agent-workspace/scripts/self_check.py
 uv run --no-project python -m unittest discover -s skills/bootstrap-agent-workspace/tests -v
 uv run --no-project python skills/task-handoff/scripts/validate_handoff.py <handoff.md>
+uv run --no-project python -m unittest discover -s skills/task-handoff/tests -v
 ```
 
 `task-handoff` 校验器另有 PowerShell / bash+gawk 等价实现（`skills/task-handoff/scripts/validate_handoff.{ps1,sh}`），三语言同构、同失败语义。本仓不把 Hypothesis / `specs/**/pilot` 列入发布验证；Correctness 思想写在 `spec-writing` Skill 内，供消费者项目按变更门选用。

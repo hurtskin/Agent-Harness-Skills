@@ -79,6 +79,7 @@
 6. **继续审问**：信息仍不足时调用新的无状态子代理，最多进行 3 轮。
 7. **独立终审**：审问停止后额外调用一次子代理；终审六字段、接任摘要、TL;DR、终态及理由证据在内存归并后一次封存。
 8. **选择交付方式**：根据长度和用户选择输出文档、提示词或组合交付。
+9. **交接文档清理**：接任方完成接管并确认不再需要后，删除交接文档（删除前说明影响）。
 
 ## 子代理输出契约
 
@@ -189,6 +190,7 @@ TL;DR 不是空标题骨架：`Objective` 至少一个非空目标；`Current St
 - 状态文件不得包含密钥、令牌、个人隐私或未经脱敏的敏感日志
 - 未经用户确认，不覆盖 `AGENTS.md`、长期记忆或已有交接文档
 - 终态写入后不得继续审问；发现新事实时应创建新的交接会话
+- 交接完成后由接任方删除过期交接文档，删除前说明影响
 
 ## 目录结构
 
@@ -196,15 +198,25 @@ TL;DR 不是空标题骨架：`Objective` 至少一个非空目标；`Current St
 task-handoff/
 ├── README.md
 ├── SKILL.md
-└── scripts/
-    ├── validate_handoff.py
-    ├── validate_handoff.ps1
-    └── validate_handoff.sh
+├── scripts/
+│   ├── validate_handoff.py
+│   ├── validate_handoff.ps1
+│   └── validate_handoff.sh
+└── tests/
+    ├── test_validator_parity.py
+    └── fixtures/
+        ├── good.md
+        ├── bad1_dupkey.md
+        ├── bad2_unknownkey.md
+        ├── bad3_enum.md
+        ├── bad4_statusmismatch.md
+        └── bad5_missingsection.md
 ```
 
 - `SKILL.md`：Skill 的触发条件、执行规范、状态机和完整约束
 - `README.md`：面向使用者的能力说明和快速使用指南
 - `scripts/`：§4.1 确定性校验器的三语言等价参考实现（Python / PowerShell / bash+gawk），共享同一 Schema 与失败语义，对同一 handoff 文件产出一致的 VALID/INVALID 判定与 SHA-256 字节摘要
+- `tests/`：三语言对拍测试——`good.md` 三版须 VALID 且摘要一致，`bad1..5` 三版须一致拒绝
 
 ## 当前验证范围
 
