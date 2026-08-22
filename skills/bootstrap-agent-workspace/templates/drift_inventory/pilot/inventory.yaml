@@ -1,0 +1,40 @@
+# Drift inventory manifest (gitignored sandbox). Generated alongside spec; machine-readable counts + bindings.
+spec_id: register-domain
+version: "0.1.0"
+
+sources:
+  spec_md: specs/drift/pilot/spec.md
+  tasks_md: specs/drift/pilot/tasks.md
+
+counts:
+  gherkin_scenarios: 2
+  tc_markers: 2
+  properties: 3
+  pt_automated: 3
+
+symbols:
+  - kind: enum
+    name: UserStatus
+    members: [PENDING_VERIFICATION, ACTIVE, DISABLED]
+  - kind: class
+    name: User
+    members: [user_id, email, password, status]
+  - kind: class
+    name: UserStore
+    members: []
+
+bindings:
+  - symbol: UserStatus
+    language: python
+    paths:
+      - specs/verification/pilot/register_domain.py
+    expect:
+      type_name: UserStatus
+      members: [PENDING_VERIFICATION, ACTIVE, DISABLED]
+  - symbol: User
+    language: python
+    paths:
+      - specs/verification/pilot/register_domain.py
+    expect:
+      type_name: User
+      members: [user_id, email, password, status]

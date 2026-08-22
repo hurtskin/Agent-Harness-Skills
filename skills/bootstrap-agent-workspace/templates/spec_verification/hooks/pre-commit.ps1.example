@@ -1,0 +1,12 @@
+# Git native pre-commit hook for Windows (example). Install:
+#   Copy-Item specs/verification/hooks/pre-commit.ps1.example .git/hooks/pre-commit
+#
+# Git for Windows runs hooks via sh; this file is for hosts that invoke PowerShell hooks directly.
+# Prefer pre-commit framework (.pre-commit-config.yaml.example) on mixed teams.
+
+$ErrorActionPreference = 'Stop'
+$Root = git rev-parse --show-toplevel
+if (-not $Root) { exit 1 }
+
+& powershell -NoProfile -File "$Root/specs/verification/hooks/pre_commit_entry.ps1"
+exit $LASTEXITCODE

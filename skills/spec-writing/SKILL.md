@@ -1,12 +1,25 @@
 ---
 name: "spec-writing"
-description: "Spec 文档编写规范(10 段强制结构 + Properties 行为不变量推荐 + 完整示例 + 零自由发挥 + 落地前 15+2 题自检)。Invoke when 立 spec / 写 spec / 评审 spec / 补 spec 三件套(spec.md / tasks.md / checklist.md) / 检查 spec 完整性 / 排查自由发挥空间 / 补性质 Properties。按 10 段结构落 spec,关键推荐 Properties(∀ oracle) 供 PBT/Correctness;落地前必跑 15 题自检 + Properties 2 题。"
+description: "Spec 文档编写规范(10 段强制结构 + Properties 行为不变量推荐 + inventory/verify 工具用法 + 完整示例 + 零自由发挥 + 落地前 15+2 题自检)。Invoke when 立 spec / 写 spec / 评审 spec / 补 spec 三件套 / inventory / matrix 验证 / drift / 跑 PT / 检查 spec 完整性 / 补性质 Properties。按 10 段结构落 spec；启用 verify-matrix/drift-inventory 前先读 tools/enablement.md。"
 ---
 
 # Spec 文档编写规范与生成规则
 
 > **来源**：2026-07-03 从 `.trae/rules/spec创建规则.md` 迁出,改为 skill。
-> **触发**：用户提到「立 spec」「写 spec」「评审 spec」「补 spec 三件套」「spec 完整性」时,先调本 skill 拿 10 段骨架。
+> **触发**：用户提到「立 spec」「写 spec」「评审 spec」「补 spec 三件套」「inventory」「matrix」「drift」「跑 PT」时,先读本 skill；涉及验证前读 [`tools/enablement.md`](./tools/enablement.md)。
+
+---
+
+## 0. 工具路由（bootstrap 装机，本 Skill 用法）
+
+| 任务 | 先决条件 | 读取 |
+|---|---|---|
+| 写/改 Spec 三件套 | — | 下文 §1–§6 |
+| 同步 `inventory.yaml` | 探测 `specs/drift/drift_inventory.py` 或 AGENTS 表 | [`tools/drift-inventory.md`](./tools/drift-inventory.md) |
+| 跑 Correctness / 改 matrix | 探测 `specs/verification/matrix.yaml` | [`tools/verify-matrix.md`](./tools/verify-matrix.md) |
+| 不确定是否启用 | — | [`tools/enablement.md`](./tools/enablement.md) |
+
+装机与 pre-commit 接线在 **bootstrap**；AGENTS「Spec 工具」表只登记 yes/no 与探测路径。
 
 ---
 
@@ -27,6 +40,7 @@ description: "Spec 文档编写规范(10 段强制结构 + Properties 行为不�
   - 示例:`/specs/auth/registration/`
 - **文件命名**:
   - 主规范文档:`spec.md` (或 `spec.yaml`,若整个规范用结构化语言表达)
+  - 机器可读契约（推荐）:`inventory.yaml`（与三件套同目录；`counts` + `bindings`，供 drift-inventory；见 [`tools/drift-inventory.md`](./tools/drift-inventory.md)）
   - 可执行场景:`features/{功能名}.feature` (Gherkin)
   - API 契约:`openapi.yaml`
   - 数据模型:`{实体名}.schema.json`

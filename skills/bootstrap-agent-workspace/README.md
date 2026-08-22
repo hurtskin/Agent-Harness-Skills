@@ -2,7 +2,7 @@
 
 面向主流 Agent Harness 的 AI Agent 工作区初始化 Skill。它将激活路由、跨工具公共规则、客户端适配和可选工具拆分为独立文档，只加载本次真正需要的部分。
 
-所有原生加载项目根 `AGENTS.md` 的 Agent Harness（Trae、Codex、OpenCode、Pi、Qoder 等）开箱即用；Claude Code 额外生成 `CLAUDE.md` 薄入口。协作原则、安全红线与踩坑教训并入 `AGENTS.md` 唯一 P0 事实源，决策记录采用 `decisions/` 目录（一决策一文件 + `_INDEX.md` 索引），换工具零迁移。完整工具链默认带路径成对钩子；`drift-check` 仅自定义可选（偏 Python，需共享 `tools/` 环境）。
+所有原生加载项目根 `AGENTS.md` 的 Agent Harness（Trae、Codex、OpenCode、Pi、Qoder 等）开箱即用；Claude Code 额外生成 `CLAUDE.md` 薄入口。协作原则、安全红线与踩坑教训并入 `AGENTS.md` 唯一 P0 事实源，决策记录采用 `decisions/` 目录（一决策一文件 + `_INDEX.md` 索引），换工具零迁移。套餐按项目规模划分；verify-matrix / drift-inventory 用法在 spec-writing，bootstrap 只装机与 AGENTS 登记。
 
 ## 核心特性
 
@@ -10,13 +10,8 @@
 - `COMMON.md` 维护跨工具公共流程、单一事实源和产物门禁
 - 所有原生加载 `AGENTS.md` 的工具零适配；仅 Claude Code 有独立适配器（`CLAUDE.md` 入口差异）
 - 支持单人 / 多人协同：多人时共享宪法 Git 跟踪 + `.agents/` 个人层不跟踪 + 决策晋升流程（草稿无号 → 晋升认领序号 → 人工 review 合并）
-- 核心文档、排期、路径成对钩子可独立选择；drift-check 仅自定义可选
-- 未选模块不加载、不生成、不安装依赖，也不注入规则
-- 已有文件默认增量升级，覆盖或重建必须得到明确授权
-- 客户端入口只保存索引和必要差异，不复制完整公共事实
-- 初始化完成后的日常上下文按 P0 / P1 / P2 分级加载：AGENTS.md 唯一常驻，决策历史默认按需读取
-- 分级加载不改变初始化阶段的模块按需路由，也不改变现有公共事实源路径
-- 两个可选 Python 工具（当前主要为 drift-check）若启用则共享唯一的 `tools/.venv` 和 `tools/uv.lock`
+- 核心文档、排期、路径成对、verify-matrix、drift-inventory 可独立选择
+- verify / drift 使用项目解释器，不绑 bootstrap 内 uv workspace
 
 ## 触发方式
 
@@ -42,45 +37,54 @@
 SKILL.md
 ├── COMMON.md
 ├── adapters/claude-code.md           仅当前工具为 Claude Code 时
-├── 首屏按目的选择场景套餐
-│   ├── 快速开始（推荐）
-│   ├── 完整工具链（适合大型协作）
+├── 首屏按目的选择场景套餐（含适合项目规模）
+│   ├── 快速开始（微型）
+│   ├── 敏捷迭代（小型）
+│   ├── 规范交付（中型）
+│   ├── 大型协作（大型）
 │   └── 自定义能力 → 再显示技术模块多选
-├── workflows/core-documents.md      套餐映射或自定义选中核心文档时
-├── modules/kanban.md                套餐映射或自定义选中排期时
-├── modules/path-align-hooks.md       完整工具链或自定义选中路径成对时
-├── modules/drift-check.md            仅自定义选中 drift-check 时
-├── modules/python-workspace.md      选中任一 Python 工具时
+├── workflows/core-documents.md
+├── modules/kanban.md
+├── modules/path-align-hooks.md
+├── modules/verify-matrix.md
+├── modules/drift-inventory.md
+├── modules/verify-matrix.md
+├── modules/drift-inventory.md
+├── modules/path-align-hooks.md
 └── workflows/verification.md        最后按确认范围验收
 ```
 
 首次引导先询问用户想达到什么效果，首屏不要求理解 drift 等术语：
 
-1. **快速开始（推荐）**：建立项目协作说明、决策目录和待办排期，马上开始推进工作。
-2. **完整工具链（适合大型协作）**：在快速开始基础上，附带轮次结束路径成对脚本，提醒契约侧与实现侧成对修改。
-3. **自定义能力**：自行组合具体能力，此时才显示技术模块多选（含可选高级 `drift-check`）。
+1. **快速开始** — 微型：个人脚本、Demo、文档仓。
+2. **敏捷迭代** — 小型：兼职、小程序、MVP、1–2 人；含路径成对钩子。
+3. **规范交付** — 中型：有 Spec、要 pre-commit 验证与 inventory 漂移检查。
+4. **大型协作** — 大型：多人长周期；同规范交付 + 多人协同骨架。
+5. **自定义能力** — 自行组合模块。
 
-确认前会汇报所选套餐、对应技术模块、将加载的文档和将生成的产物。未选择的模块不会参与执行。
+verify / drift 日常用法见 **spec-writing** `tools/`；bootstrap 只复制 `specs/verification/`、`specs/drift/` 模板。
 
 ## 套餐映射与模块产物
 
-| 场景套餐 | 技术模块 |
-|---|---|
-| 快速开始（推荐） | 核心工作区文档 + 排期清单 |
-| 完整工具链（适合大型协作） | 核心工作区文档 + 排期清单 + 路径成对钩子 |
-| 自定义能力 | 核心工作区文档、排期清单、路径成对钩子、drift-check（可选高级）多选 |
-
-技术模块名在确认清单或自定义入口中展示。`路径成对钩子` 是完整工具链默认深度能力（L0，与语言无关）；如何挂到宿主 hook 由执行 Agent 按当前工具处理，Skill 内不写分 Harness 适配长文。`drift-check` **不在默认套餐内**，仅自定义可选：偏 Python + 特定 Spec 布局的静态扫描，需维护 Adapter；日常多语言 / Skill 仓库通常不如路径成对划算。
+| 场景套餐 | 适合规模 | 技术模块 |
+|---|---|---|
+| 快速开始（推荐） | 微型 | 核心 + 排期 |
+| 敏捷迭代 | 小型 | 核心 + 排期 + 路径成对 |
+| 规范交付 | 中型 | 核心 + 排期 + 路径成对 + verify-matrix + drift-inventory |
+| 大型协作 | 大型 | 同规范交付（+ 多人协同文档） |
+| 自定义 | 任意 | 多选 |
 
 | 选择 | 加载文档 | 主要产物 |
 |---|---|---|
-| 核心工作区文档 | `workflows/core-documents.md` | `AGENTS.md`（含协作原则/红线/踩坑教训）、`decisions/` 目录 |
+| 核心工作区文档 | `workflows/core-documents.md` | `AGENTS.md`（含 Spec 工具表）、`decisions/` |
 | 排期清单 | `modules/kanban.md` | `BACKLOG.md` |
-| drift-check | `modules/drift-check.md` | `tools/drift_check/` |
-| drift-check | `modules/python-workspace.md` | `tools/pyproject.toml`、`tools/.venv`、`tools/uv.lock` |
 | 路径成对钩子 | `modules/path-align-hooks.md` | `tools/path_align_hooks/` |
+| verify-matrix | `modules/verify-matrix.md` | `specs/verification/` |
+| drift-inventory | `modules/drift-inventory.md` | `specs/drift/` |
+| verify-matrix | `modules/verify-matrix.md` | `specs/verification/` |
+| drift-inventory | `modules/drift-inventory.md` | `specs/drift/` |
 
-核心文档不是路径成对或 drift-check 的强制前置条件。例如仅选择工具模块时，不会为了登记适配状态而创建 `AGENTS.md`。
+核心文档不是 path-align 或 Spec 工具的强制前置条件。
 
 ## 单一事实源
 
@@ -137,29 +141,6 @@ SKILL.md
 
 无法确定工具或自动加载入口时，询问用户；只有 `AGENTS.md` 已存在或本次将生成时，才向其中写入“Agent 工具适配”表，否则只在执行结果中报告适配状态。同一项目多工具使用时共享 `AGENTS.md` 事实源，Claude Code 额外生成薄入口。
 
-## 共享 Python Workspace
-
-drift-check 使用 uv workspace：
-
-```text
-tools/
-├── pyproject.toml
-├── uv.lock
-├── .venv/
-└── drift_check/
-```
-
-统一从项目 `tools/` 运行：
-
-```powershell
-Set-Location "tools"
-uv sync --all-packages --all-extras
-uv run pytest drift_check/tests
-uv run drift-check scan --project-root ..
-```
-
-后续增加第二个 Python 工具时更新 members 并同步现有环境，不创建成员级 `.venv` 或第二个锁文件。
-
 ## 文档先行边界
 
 文档先行流程适用于目标项目的业务代码、架构、接口、数据模型和行为规则变更：
@@ -171,7 +152,7 @@ uv run drift-check scan --project-root ..
 5. 运行所选范围的验证。
 6. 只回写 `available_artifacts` 中与本次变更相关的文档。
 
-按已确认模块流程复制或安装 drift-check 工具模板时，不要求补建未选核心文档。如果工具初始化同时改变项目接口、架构或运行行为，相关项目变更部分仍执行文档先行流程。
+按已确认模块流程复制工具模板时，不要求补建未选核心文档。
 
 ## 验收规则
 
@@ -182,7 +163,7 @@ uv run drift-check scan --project-root ..
 - 所有入口和相对路径有效，P0 保持精简，P1/P2 读取条件清楚
 - decisions/ 和归档内容未进入无条件自动加载链；协作原则、红线与教训都在 `AGENTS.md` 内，无独立副本
 - 同一公共事实源没有通过原生入口、引用或配置重复自动加载
-- Python 工具共享唯一 workspace、虚拟环境和锁文件
+- Python 工具（verify/drift runner）使用项目解释器，不在 bootstrap 内维护共享 uv workspace
 
 因缺少未选公共产物而主动跳过客户端入口，不判为失败。
 
@@ -200,24 +181,19 @@ bootstrap-agent-workspace/
 │   └── verification.md
 ├── modules/
 │   ├── kanban.md
-│   ├── drift-check.md
-│   ├── python-workspace.md
+│   ├── verify-matrix.md
+│   ├── drift-inventory.md
 │   └── path-align-hooks.md
 └── templates/
-    ├── tools/pyproject.toml.template
-    ├── drift_check/
+    ├── spec_verification/
+    ├── drift_inventory/
     ├── path_align_hooks/
     └── kanban/BACKLOG.md.template
 ```
 
 ## 环境要求
 
-文档初始化本身不限制项目语言。启用 Python 工具时需要：
-
-- Python 3.10+
-- `uv`
-
-支持在 Windows PowerShell 环境执行模板复制、依赖同步和验证。
+文档初始化本身不限制项目语言。运行 verify / drift 模板时需项目可用的 Python 解释器（由 Agent 指定）。
 
 ## 已有项目升级
 
@@ -225,7 +201,7 @@ bootstrap-agent-workspace/
 
 - 将旧版工作区文档迁移到单一事实源结构（含旧体系 `soul.md` / `lessons-learned.md` 并入 `AGENTS.md`，单文件 `决策日志.md` 拆分为 `decisions/` 目录）
 - 为现有项目增加客户端薄入口
-- 接入 drift-check、路径成对钩子或共享 Python workspace
+- 接入 path-align、verify-matrix、drift-inventory 模板
 
 重建或覆盖任何已有文件前必须获得用户明确授权。
 
@@ -237,4 +213,4 @@ bootstrap-agent-workspace/
 - `workflows/verification.md`：按选择范围验收
 - `modules/*.md`：可选模块实现
 - `adapters/claude-code.md`：Claude Code 的 `CLAUDE.md` 入口差异
-- `templates/drift_check/README.md`：drift-check 实现说明
+- `templates/spec_verification/README.md`、`templates/drift_inventory/README.md`：Spec 工具模板说明

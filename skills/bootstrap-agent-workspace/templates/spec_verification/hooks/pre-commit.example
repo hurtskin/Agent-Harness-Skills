@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Git native pre-commit hook (example). Install:
+#   cp specs/verification/hooks/pre-commit.example .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# Set project interpreter before commit if needed:
+#   export PYTHON='uv run --no-project python'
+
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+ENTRY="$ROOT/specs/verification/hooks/pre_commit_entry.sh"
+
+if [[ ! -x "$ENTRY" ]]; then
+  echo "[verify] hook entry missing: $ENTRY" >&2
+  exit 1
+fi
+
+exec "$ENTRY"

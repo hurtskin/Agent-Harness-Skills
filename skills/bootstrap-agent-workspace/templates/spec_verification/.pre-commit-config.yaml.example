@@ -1,0 +1,16 @@
+# pre-commit framework wiring (example). Copy to repo root as .pre-commit-config.yaml
+# Install: pip install pre-commit && pre-commit install
+#
+# PYTHON: set in shell profile, or uncomment env below. Agent knows project interpreter.
+
+repos:
+  - repo: local
+    hooks:
+      - id: verify-matrix
+        name: matrix verification (watch hit)
+        entry: powershell -NoProfile -File specs/verification/hooks/pre_commit_entry.ps1
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+        # env:
+        #   PYTHON: python

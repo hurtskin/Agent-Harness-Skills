@@ -35,4 +35,4 @@ bash tools/path_align_hooks/drift_lite.sh
 
 - 模板与安装路径均无 Harness 专属目录名；禁止在本模块产物中写入某工具的 hooks 配置文件作为「标准答案」。
 - 未选本模块：不复制脚本、不改 AGENTS、不注册任何 hook。
-- 与 `drift-check` 独立：完整工具链默认只带本模块；`drift-check` 仅自定义可选。本模块是 L0 路径成对，不替代 D1–D6，也不触发 Correctness / PBT。
+- 与 verify-matrix、drift-inventory 独立：本模块是 L0 路径成对，不替代 Correctness 或 inventory L1/L2。

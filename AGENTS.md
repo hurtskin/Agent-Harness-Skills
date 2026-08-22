@@ -50,12 +50,12 @@ uv run --no-project python -m unittest discover -s skills/bootstrap-agent-worksp
 
 - 不猜测；证据不足时先询问。只做满足已确认任务所需的最小改动，不顺手重构。
 - 业务行为、架构、接口或数据模型变更必须文档先行：定位现行 Spec/决策，先展示文档差异并获确认，再严格落代码。
-- **路径成对（L0，stop / drift-lite）**：不看文件内容是否正确，只看本轮 git dirty 是否同时触及「契约侧」与「实现侧」。只改一侧会记 `CODE_WITHOUT_SPEC` 或 `SPEC_WITHOUT_CODE`，默认可能 followup 催补；`PATH_ALIGN_NUDGE=0` / `STOP_ALIGN_FOLLOWUP=0` 可关闭催改。这不是 Correctness/行为证明，只防明显单边漂移。**本发布仓**不跟踪 `specs/`、也不以 Spec 驱动开发——改 `skills/` 文档时不必强行补 `specs/`（可 A2 说明故意单边）；该约定主要服务装了路径成对钩子的**消费者项目**。
+- **路径成对（L0，stop / drift-lite）**：不看文件内容是否正确，只看本轮 git dirty 是否同时触及「契约侧」与「实现侧」。只改一侧会记 `CODE_WITHOUT_SPEC` 或 `SPEC_WITHOUT_CODE`，默认可能 followup 催补；`PATH_ALIGN_NUDGE=0` / `STOP_ALIGN_FOLLOWUP=0` 可关闭催改。这不是 Correctness/行为证明，只防明显单边漂移。**本发布仓**不跟踪 `specs/`、也不以 Spec 驱动开发——改 `skills/` 文档时不必强行补 `specs/`（可 A2 说明故意单边）；该约定主要服务装了路径成对钩子的**消费者项目**。**本仓本地不启用** Cursor path-align hook（`.cursor/hooks.json` 无 `stop` 接线）；模板仅随 bootstrap 发给消费者。
   - **契约侧**（消费者）：`specs/`、路径含 `openapi`、`*.schema.json`
   - **实现侧**：`skills/` / `src/` / 常见源码后缀（以脚本为准）
   - **不参与配对**：`.cursor/`、已 gitignore 的沙箱等工具目录；仅改导航文档不触发成对告警
 - **Correctness 变更门**（写给 Skill 消费者）：写 `P-*` 与跑 `PT-*` 分轨；命中相关实现或性质正文才跑对应 PT。本仓不强制、不嵌入全仓 PBT。细则见 `skills/spec-writing/SKILL.md`。
-- **drift-check**：本仓库不默认依赖；bootstrap「完整工具链」默认 = 核心文档 + 排期 + 路径成对；`drift-check` 仅自定义可选（偏 Python）。
+- **drift-inventory**：结构漂移 L1/L2（inventory + regex profile）；**verify-matrix**：Correctness 验证；bootstrap 完整工具链默认 = 核心 + 排期 + 路径成对；规范交付套餐加 verify + drift。
 - 优先使用 IDE 的读取、搜索、编辑、删除等专用工具；终端仅用于 Git、依赖、构建和测试。
 - Bug 先报告现象、证据、影响与拟修复范围，得到确认后再修复。
 - 每次会话从本文件获取当前入口；P1 仅在任务命中时读取，P2（`decisions/`）先读 `decisions/_INDEX.md` 按关键词定位，再读对应决策文件，不复制全文。
@@ -118,5 +118,6 @@ uv run --no-project python -m unittest discover -s skills/bootstrap-agent-worksp
 - 2026-08-22：协作原则增补路径成对（L0 / stop·drift-lite）：契约侧 `specs/`·openapi·schema ↔ 实现侧本仓库 `skills/`（及可选 `src/`）；明确不改动 `specs/<模块>/<功能>/` 三件套层级，成对只约束变更集两侧是否同现；P1 索引与文档职责同步。
 - 2026-08-22：`spec-writing` 小步升格 Properties（第 5 部分附 + 自检 Q16/Q17）；10 段骨架不变；Hypothesis 不强制全仓 CI。
 - 2026-08-22：`bootstrap-agent-workspace` 增加「路径成对钩子」模块（`tools/path_align_hooks/` 通用模板）；完整工具链默认包含；不写分 Harness 适配长文。
-- 2026-08-22：完整工具链默认改为「核心 + 排期 + 路径成对」；`drift-check` 降为自定义可选高级模块。`spec-writing` 钉死 Correctness 变更门（写 P / 跑 PT 分轨；命中才测）。闭环见决策 [015](decisions/015-v15-path-align-default-correctness-gate.md)。
+- 2026-08-22：移除遗留 `drift-check`（D1–D6）模板；结构漂移统一为 drift-inventory + verify-matrix。
+- 2026-08-22：本发布仓停用 Cursor path-align `stop` hook（`.cursor/hooks.json` 空 hooks）；避免 Skill 文档改动误触 CODE_WITHOUT_SPEC。
 - 2026-08-22：本发布仓 `specs/` 改 gitignore（不以 Spec 驱动本仓）；验证命令去掉 Hypothesis pilot；README 重心调整为规范化契约。

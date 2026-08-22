@@ -12,7 +12,7 @@
 
 ## 核心文档（选择时）
 
-- [ ] `AGENTS.md` 章节结构完整且顺序正确：目录锚点、项目定位、当前入口、真实验证命令、协作原则、红线、（多人协作——仅多人协同模式）、踩坑教训、P1/P2 索引、文档职责、Agent 工具适配、变更日志
+- [ ] `AGENTS.md` 章节结构完整且顺序正确：目录锚点、项目定位、当前入口、真实验证命令、协作原则、红线、（多人协作——仅多人协同模式）、踩坑教训、（Spec 工具——若安装）、P1/P2 索引、文档职责、Agent 工具适配、变更日志
 - [ ] 目录锚点链接全部指向文内章节，无失效锚点
 - [ ] 项目定位章节含协作模式标记（单人 / 多人协同），与项目识别阶段的确认结果一致
 - [ ] decisions/ 目录含 `_INDEX.md` 索引表和 `001-v1-init-*.md` 首条决策；文件命名符合 `序号-版本-关键词.md`，索引行含版本、关键词、状态、相关模块；序号无重复且与版本号一一对应
@@ -28,21 +28,21 @@
 - [ ] 只包含未完成项
 - [ ] 闭环规则指向 decisions/（新建决策文件 + `_INDEX.md` 追加索引行）
 
-## Python workspace（drift-check 选择时）
-
-- [ ] `tools/pyproject.toml` members 与实际目录一致（仅 `drift_check`）
-- [ ] 仅存在 `tools/.venv` 和 `tools/uv.lock`
-- [ ] 所有安装、测试和运行命令从 `tools/` 执行
-
-## drift-check（选择时）
-
-- [ ] Adapter 匹配项目 Spec 布局
-- [ ] 从 `tools/` 执行时 `--project-root ..`
-- [ ] `uv run pytest drift_check/tests` 通过
-
 ## 路径成对钩子（选择时）
 
 - [ ] `tools/path_align_hooks/` 含 `drift_lite` 与 `turn_align` 的 `.ps1` / `.sh` 与 README
 - [ ] 独立运行 `drift_lite` 能输出含 `ok` 的 JSON
 - [ ] 未在产物中写入某 Harness 专属 hooks 配置作为「标准答案」
 - [ ] 宿主支持 hook 时：已按当前工具惯例注册 `turn_align`（或在执行结果中说明已跳过注册及原因）
+
+## verify-matrix（选择时）
+
+- [ ] `specs/verification/` 含 `matrix.yaml`、`run_verify.*`、`hooks/`
+- [ ] `AGENTS.md`「Spec 工具」表 `verify-matrix` 为 yes
+- [ ] `run_verify.ps1 -DryRun -Python python` 可执行
+
+## drift-inventory（选择时）
+
+- [ ] `specs/drift/` 含 `drift_inventory.py`、`language_profiles.yaml`、`run_drift.*`
+- [ ] `AGENTS.md`「Spec 工具」表 `drift-inventory` 为 yes
+- [ ] `run_drift.ps1 -Python python` 可执行（示例 pilot 以模板为准）

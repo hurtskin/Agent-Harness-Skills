@@ -28,7 +28,7 @@ Claude Code 使用项目 `CLAUDE.md` 或 `.claude/CLAUDE.md`，并支持 `.claud
 ## 兼容边界
 
 - 适配器不得为了生成 Claude 入口而创建 `AGENTS.md`、decisions/ 或 `BACKLOG.md`。
-- 未选择核心文档且公共文件不存在时，允许本次只配置 drift-check 等工具，不生成 Claude 项目规则入口。
+- 未选择核心文档且公共文件不存在时，允许本次只配置 path-align / verify / drift 等工具模块，不生成 Claude 项目规则入口。
 - 适配结果仅在 `AGENTS.md` 已存在或本次将生成时写入工具适配表，否则只在执行结果中报告。
 
 ## 校验

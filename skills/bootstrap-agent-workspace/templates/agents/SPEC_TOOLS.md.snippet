@@ -1,0 +1,11 @@
+## Spec 工具（可选）
+
+> bootstrap 安装后填写；spec-writing 使用前按「探测路径」检查。
+
+| 工具 | 启用 | 探测路径 | 用法 Skill |
+|---|---|---|---|
+| path-align | {{PATH_ALIGN_ENABLED}} | `tools/path_align_hooks/drift_lite.ps1` | bootstrap `path-align-hooks` |
+| verify-matrix | {{VERIFY_MATRIX_ENABLED}} | `specs/verification/matrix.yaml` | spec-writing `tools/verify-matrix.md` |
+| drift-inventory | {{DRIFT_INVENTORY_ENABLED}} | `specs/drift/drift_inventory.py` | spec-writing `tools/drift-inventory.md` |
+
+解释器：verify / drift 由 Agent 或开发者通过 `$env:PYTHON` / `-Python` 指定；runner 内不搜索 venv。

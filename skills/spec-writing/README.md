@@ -14,6 +14,7 @@
 - 模糊词黑名单：待定、TODO、视情况、类似 X、简化版等词汇出现在 spec 正文即视为未完成
 - 实施阶段 8 类禁止行为清单：自创命名、防御性代码、未来扩展点、改默认值、改测试编号、改门禁规则、docstring 字面量、未声明的二次发挥
 - 完整示例：用户邮箱注册与验证（SPEC-001）贯穿 10 段 + Properties 推荐范例，展示可逐字复刻的精度标准
+- **Spec 工具用法**（bootstrap 装机后）：[`tools/enablement.md`](./tools/enablement.md)、[`verify-matrix`](./tools/verify-matrix.md)、[`drift-inventory`](./tools/drift-inventory.md)；`inventory.yaml` 与三件套同目录
 
 ## 适用场景
 

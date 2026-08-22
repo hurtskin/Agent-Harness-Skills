@@ -1,0 +1,24 @@
+# Language profiles for L2 symbol extraction (regex baseline — tree-sitter optional later).
+extension_map:
+  .py: python
+  .go: go
+  .rs: rust
+  .ts: typescript
+  .tsx: typescript
+
+profiles:
+  python:
+    class: ^\s*class\s+(\w+)
+    enum_member: ^\s+(\w+)\s*=
+    dataclass_field: ^\s+(\w+)\s*:
+    test: ^\s*def\s+(test_\w+)
+  go:
+    type_struct: ^\s*type\s+(\w+)\s+struct
+    struct_field: ^\s+(\w+)\s+\w
+    test: ^\s*func\s+(Test\w+)
+  rust:
+    struct: ^\s*struct\s+(\w+)
+    test: ^\s*fn\s+(test_\w+)
+  typescript:
+    class: ^\s*class\s+(\w+)
+    test: ^\s*(?:it|test)\s*\(\s*['"](\w+)

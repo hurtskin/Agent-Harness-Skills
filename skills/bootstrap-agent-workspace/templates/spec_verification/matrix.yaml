@@ -1,0 +1,42 @@
+# Local verification matrix (gitignored). Skill templates come after this passes.
+# kind: pbt | example | contract | manual
+#   pbt      — property / random-search tests (often needs {python})
+#   example  — table-driven or script checks (any shell command)
+#   contract — schema / OpenAPI / matrix self-check
+#   manual   — Spec P-* only; runner skips (never auto-run)
+version: 1
+
+modules:
+  - id: example-register
+    kind: pbt
+    note: "Sandbox — stdlib property search; {python} from Agent via -Python / PYTHON"
+    watch:
+      - skills/spec-writing/**
+      - specs/verification/pilot/**
+    test:
+      cwd: "{repo_root}"
+      command: "{python} -m unittest discover -s specs/verification/pilot -v"
+
+  - id: example-readme
+    kind: example
+    note: "No PBT framework — example script on README touch"
+    watch:
+      - README.md
+    test:
+      cwd: "{repo_root}"
+      command: "powershell -NoProfile -File specs/verification/pilot/check_readme_example.ps1"
+
+  - id: example-matrix-contract
+    kind: contract
+    note: "Contract check — matrix structure valid"
+    watch:
+      - specs/verification/matrix.yaml
+    test:
+      cwd: "{repo_root}"
+      command: "{python} specs/verification/pilot/validate_matrix_contract.py"
+
+  - id: docs-manual-only
+    kind: manual
+    note: "Properties in spec only; checklist / human gate — not in runner"
+    watch:
+      - BACKLOG.md

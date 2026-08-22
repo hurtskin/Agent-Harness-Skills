@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Combined pre-commit: verify-matrix (watch hit) + drift-inventory (global pilot).
+# Copy to .git/hooks/pre-commit and chmod +x. Set PYTHON if needed.
+set -euo pipefail
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+PY="${PYTHON:-python}"
+
+if [[ -f specs/verification/hooks/pre_commit_entry.sh ]]; then
+  bash specs/verification/hooks/pre_commit_entry.sh --python "$PY" --pre-commit
+elif [[ -f specs/verification/hooks/pre_commit_entry.ps1 ]]; then
+  powershell -NoProfile -File specs/verification/hooks/pre_commit_entry.ps1 -Python "$PY"
+fi
+
+if [[ -f specs/drift/drift_inventory.py && -f specs/drift/pilot/inventory.yaml ]]; then
+  "$PY" specs/drift/drift_inventory.py --repo-root . --inventory specs/drift/pilot/inventory.yaml
+fi

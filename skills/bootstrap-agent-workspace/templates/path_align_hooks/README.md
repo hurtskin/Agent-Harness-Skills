@@ -48,5 +48,5 @@ bash tools/path_align_hooks/drift_lite.sh --fail-on-risk
 ## 非目标
 
 - 不做函数级 / 行为级 Correctness
-- 不替代 `tools/drift_check`（D1–D6）
+- 不替代 drift-inventory（L1/L2）或 verify-matrix（Correctness）
 - 不内置任何 Harness 专属配置文件

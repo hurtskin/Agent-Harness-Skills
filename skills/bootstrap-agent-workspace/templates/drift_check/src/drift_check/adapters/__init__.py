@@ -1,1 +1,0 @@
-"""Adapters for drift-check."""

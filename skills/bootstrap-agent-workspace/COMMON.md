@@ -100,11 +100,11 @@
 |---|---|
 | 核心工作区文档 | `workflows/core-documents.md` |
 | 排期清单 | `modules/kanban.md` |
-| drift-check | `modules/drift-check.md` |
-| drift-check | `modules/python-workspace.md` |
 | 路径成对钩子 | `modules/path-align-hooks.md` |
+| verify-matrix | `modules/verify-matrix.md` |
+| drift-inventory | `modules/drift-inventory.md` |
 
-未选择的模块不得生成产物、安装依赖或注入强制规则。完整工具链默认含路径成对钩子，不含 drift-check。选择路径成对钩子时，复制通用脚本到 `tools/path_align_hooks/`；不在本 Skill 内写入分 Harness 的 hook 配置样板。仅自定义勾选 drift-check 时，在项目 `tools/` 创建 uv workspace，使用唯一的 `tools/.venv` 和 `tools/uv.lock`。
+未选择的模块不得生成产物、安装依赖或注入强制规则。套餐「敏捷迭代」及以上默认含路径成对钩子；「规范交付 / 大型协作」含 verify-matrix + drift-inventory。
 
 生成或升级工具入口（如 `CLAUDE.md`）前必须形成产物清单：
 
@@ -116,7 +116,7 @@
 
 ## 7. 文档先行硬流程
 
-以下流程适用于目标项目的业务代码、架构、接口、数据模型和行为规则变更，不适用于按本 Skill 已确认模块流程复制或安装 drift-check 等工具模板。
+以下流程适用于目标项目的业务代码、架构、接口、数据模型和行为规则变更，不适用于按本 Skill 已确认模块流程复制或安装工具模板。
 
 项目代码修改必须：
 
@@ -124,7 +124,7 @@
 2. 读现行文档并列出“文档现状 / 计划变化”。
 3. 先改文档，展示差异并等待用户确认。
 4. 严格按文档改代码，不二次发挥。
-5. 运行项目实际安装的验证工具；只有用户选择 drift-check 后才执行对应扫描。
+5. 运行项目实际安装的验证工具（verify-matrix / drift-inventory 按 AGENTS 表与 spec-writing 启用检测）。
 6. 只回写 `available_artifacts` 中已生成且与本次变更相关的 decisions/（新建决策文件 + `_INDEX.md` 追加行）、文档目录树、排期与 AGENTS.md 踩坑教训章节。
 
 工具模板初始化严格按用户已确认的模块文档执行，不得因此补建未选核心文档；若初始化同时改变项目架构、接口或运行行为，则相关项目变更部分仍须执行上述文档先行流程。

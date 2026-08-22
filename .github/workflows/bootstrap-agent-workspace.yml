@@ -27,7 +27,3 @@ jobs:
         run: uv run --no-project python skills/bootstrap-agent-workspace/scripts/self_check.py
       - name: Test workspace self-check
         run: uv run --no-project python -m unittest discover -s skills/bootstrap-agent-workspace/tests -v
-      - name: Test drift-check template
-        run: >-
-          uv run --project skills/bootstrap-agent-workspace/templates/drift_check --extra dev
-          pytest skills/bootstrap-agent-workspace/templates/drift_check/tests
