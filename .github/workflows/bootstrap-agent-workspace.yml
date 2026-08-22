@@ -41,3 +41,5 @@ jobs:
         run: uv run --no-project python skills/bootstrap-agent-workspace/scripts/self_check.py
       - name: Test workspace self-check
         run: uv run --no-project python -m unittest discover -s skills/bootstrap-agent-workspace/tests -v
+      - name: Test handoff validator parity
+        run: uv run --no-project python -m unittest discover -s skills/task-handoff/tests -v
