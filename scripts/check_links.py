@@ -17,6 +17,14 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote
 
+
+def configure_output_encoding() -> None:
+    """CI 的 Windows runner 默认 cp1252，中文输出会 UnicodeEncodeError；统一改 UTF-8。"""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 # 匹配 [text](url) 与 ![alt](url)；标题段由后续 split 取首段处理。
@@ -90,6 +98,7 @@ def check_links() -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    configure_output_encoding()
     errors = check_links()
     if errors:
         for error in errors:

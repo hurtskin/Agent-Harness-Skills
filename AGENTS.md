@@ -73,6 +73,7 @@ uv run --no-project python -m unittest discover -s skills/bootstrap-agent-worksp
 每条一句话：错误做法 → 正确做法。`L-NNN` 编号从 `L-001` 递增；条目仅追加，不重排、不改既有编号；无项目证据不得预填。
 
 - L-001：全局残留检查用 `*.md` glob 过滤，漏掉 `排期清单.md.template` 里的旧体系引用 → 一致性检查不按文件后缀过滤，模板、配置、代码注释一并扫描。
+- L-002：新写的 Python 脚本直接 `print` 中文，本机 UTF-8 控制台全绿，CI Windows runner（默认 cp1252）`UnicodeEncodeError` 崩溃 → 脚本入口加 `configure_output_encoding()` 把 stdout/stderr reconfigure 为 UTF-8（模式见 `skills/bootstrap-agent-workspace/scripts/self_check.py`），并可在本地用强制 cp1252 复现验证。
 
 ## P1 / P2 索引
 
