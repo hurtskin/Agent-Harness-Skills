@@ -3,11 +3,23 @@ name: bootstrap-agent-workspace
 on:
   push:
     paths:
-      - "skills/bootstrap-agent-workspace/**"
+      - "skills/**"
+      - "scripts/**"
+      - "AGENTS.md"
+      - "README.md"
+      - "BACKLOG.md"
+      - "decisions/**"
+      - "docs/**"
       - ".github/workflows/bootstrap-agent-workspace.yml"
   pull_request:
     paths:
-      - "skills/bootstrap-agent-workspace/**"
+      - "skills/**"
+      - "scripts/**"
+      - "AGENTS.md"
+      - "README.md"
+      - "BACKLOG.md"
+      - "decisions/**"
+      - "docs/**"
       - ".github/workflows/bootstrap-agent-workspace.yml"
 
 jobs:
@@ -23,6 +35,8 @@ jobs:
         with:
           python-version: "3.12"
           enable-cache: true
+      - name: Repo link check
+        run: uv run --no-project python scripts/check_links.py
       - name: Run workspace self-check
         run: uv run --no-project python skills/bootstrap-agent-workspace/scripts/self_check.py
       - name: Test workspace self-check

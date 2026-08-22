@@ -3,9 +3,7 @@ tools/.venv/
 **/__pycache__/
 .pytest_cache/
 .cursor/
-BACKLOG.md
 .trae/
-tools/
-decisions/
+/tools/
 CHANGELOG.md
 specs/

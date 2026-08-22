@@ -40,6 +40,7 @@ Agent Harness Skills 是面向 Trae 与主流 Agent Harness 的多 Skill 自包�
 在仓库根目录执行：
 
 ```powershell
+uv run --no-project python scripts/check_links.py
 uv run --no-project python skills/bootstrap-agent-workspace/scripts/self_check.py
 uv run --no-project python -m unittest discover -s skills/bootstrap-agent-workspace/tests -v
 ```
@@ -82,7 +83,7 @@ uv run --no-project python -m unittest discover -s skills/bootstrap-agent-worksp
 | P1 | `.github/workflows/bootstrap-agent-workspace.yml` | 修改或核对现有 CI 验证范围时 |
 | P1 | `BACKLOG.md` | 规划任务、判断是否闭环待办时 |
 | P1 | `specs/`（本仓不跟踪） | 消费者项目 Spec 布局约定仍为 `specs/<模块>/<功能>/` 三件套；本发布仓 `specs/` 已 gitignore，仅本地沙箱可选 |
-| P1 | `.cursor/hooks/`（可选） | 维护宿主本地 hook 接线时；默认不预读。通用脚本在 `tools/path_align_hooks/`（bootstrap 模板） |
+| P1 | `.cursor/hooks/`（可选） | 维护宿主本地 hook 接线时；默认不预读。通用脚本模板在 `skills/bootstrap-agent-workspace/templates/path_align_hooks/` |
 | P2 | `decisions/` | 追溯决策时先读 `decisions/_INDEX.md` 按关键词定位，再读对应决策文件；`ls decisions/` 可浏览全史 |
 | P2 | 归档 Spec（当前无） | 仅在追溯对应历史主题时读取 |
 
@@ -121,3 +122,4 @@ uv run --no-project python -m unittest discover -s skills/bootstrap-agent-worksp
 - 2026-08-22：移除遗留 `drift-check`（D1–D6）模板；结构漂移统一为 drift-inventory + verify-matrix。
 - 2026-08-22：本发布仓停用 Cursor path-align `stop` hook（`.cursor/hooks.json` 空 hooks）；避免 Skill 文档改动误触 CODE_WITHOUT_SPEC。
 - 2026-08-22：本发布仓 `specs/` 改 gitignore（不以 Spec 驱动本仓）；验证命令去掉 Hypothesis pilot；README 重心调整为规范化契约。
+- 2026-08-22：新增 `scripts/check_links.py` 仓库级链接校验（目标缺失 + 被 gitignore 两类死链），纳入真实验证命令与 CI；`.gitignore` `tools/` 改 `/tools/` 锚定根，解除对 `skills/spec-writing/tools/` 误杀并补跟踪；P1 索引 path-align 模板路径更正为 `skills/.../templates/path_align_hooks/`；README「双层守门」补 turn-end 条件化说明。

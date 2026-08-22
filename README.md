@@ -26,7 +26,7 @@ Kiro 公开叙事里反复出现的三件事：**Spec 当事实源**、**Hook �
 | Kiro 主线 | 本仓库谁负责 | 覆盖程度 |
 |---|---|---|
 | Spec 驱动开发 | `spec-writing` | ✅ 10 段 + 三件套 + 零自由发挥；偏「写规」而非 IDE 内置 Spec 面板 |
-| Agent Hooks | `bootstrap` 装机 + 接线 | ✅ **双层守门**：① **turn-end** `turn_align` — L0 路径成对 nudge；② **pre-commit 兜底** — verify-matrix（PBT / example / contract，staged 命中 `watch` 才跑）+ drift-inventory（L1/L2 inventory 比对）。三层互补，不是「只有轻量 L0」。⚠️ 接线 Harness 无关、项目自建，非 Kiro IDE 内置 hook 商店 |
+| Agent Hooks | `bootstrap` 装机 + 接线 | ✅ **双层守门**：① **turn-end** `turn_align`（**需 Harness 支持轮次结束 hook 并自行接线，本仓默认不启用**）— L0 路径成对 nudge；② **pre-commit 兜底** — verify-matrix（PBT / example / contract，staged 命中 `watch` 才跑）+ drift-inventory（L1/L2 inventory 比对）。三层互补，不是「只有轻量 L0」。⚠️ 接线 Harness 无关、项目自建，非 Kiro IDE 内置 hook 商店；无 turn-end hook 时退化为仅 pre-commit 单层 |
 | Correctness / Properties | `spec-writing` + verify-matrix | ✅ `P-*` / `PT-*` + **变更门**；PT 由 pre-commit hook 或手动 `run_verify` 执行；⚠️ 矩阵与解释器由项目维护，非 IDE 内置 PBT 流水线 |
 | 长会话 / 换 Agent 不断档 | `task-handoff` | ➕ **本组合额外能力**，非 Kiro 宣传重点 |
 | 多人各带 AI 不撕规范 | `bootstrap` 多人协同 | ➕ **本组合额外能力**（`.agents/` + 决策晋升） |
