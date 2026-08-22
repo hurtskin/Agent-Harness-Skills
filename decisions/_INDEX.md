@@ -19,3 +19,4 @@
 | [013](013-v13-collaboration-mode.md) | v13 | 多人协同,协作模式,collaboration_mode,初始化询问,项目定位,标记 | 活跃 | bootstrap-agent-workspace |
 | [014](014-v14-multi-collab-agents-layer.md) | v14 | 多人协同,协作模式,.agents,个人层,共享宪法,晋升流程,序号认领,撞号,起草确认制,gitignore | 活跃 | bootstrap-agent-workspace |
 | [015](015-v15-path-align-default-correctness-gate.md) | v15 | 完整工具链,路径成对,path-align,drift-check,可选高级,Correctness,变更门,Properties,PBT | 活跃 | bootstrap-agent-workspace, spec-writing |
+| [016](016-v16-task-handoff-validator-ci.md) | v16 | task-handoff,校验器,validate_handoff,双语言,ps1/sh,移除 py,对拍,fixtures,CI,单条 evidence 缺陷 | 活跃 | task-handoff |

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # validate_handoff.sh - task-handoff v2 deterministic validator (bash/gawk)
-# Twin: validate_handoff.py (Python) and validate_handoff.ps1 (PowerShell).
+# Twin: validate_handoff.ps1 (PowerShell).
 #
 # Usage: bash validate_handoff.sh <file>
 # Exit 0 = VALID (prints VALID + DIGEST <sha256>); 1 = invalid; 2 = usage / not found.
 #
 # Front matter is a restricted YAML subset (flat key:value + one sequence +
 # single-line scalars). Safety is enforced by rejecting any YAML feature outside
-# that subset. Parity baseline: Python and PowerShell twins.
+# that subset. Parity baseline: PowerShell twin.
 #
 # Requires: gawk, grep, sha256sum, iconv, locale (coreutils). A UTF-8 locale is
 # needed so the 1500-char TL;DR limit counts Unicode characters, not bytes.

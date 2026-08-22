@@ -199,7 +199,6 @@ task-handoff/
 ├── README.md
 ├── SKILL.md
 ├── scripts/
-│   ├── validate_handoff.py
 │   ├── validate_handoff.ps1
 │   └── validate_handoff.sh
 └── tests/
@@ -215,11 +214,11 @@ task-handoff/
 
 - `SKILL.md`：Skill 的触发条件、执行规范、状态机和完整约束
 - `README.md`：面向使用者的能力说明和快速使用指南
-- `scripts/`：§4.1 确定性校验器的三语言等价参考实现（Python / PowerShell / bash+gawk），共享同一 Schema 与失败语义，对同一 handoff 文件产出一致的 VALID/INVALID 判定与 SHA-256 字节摘要
-- `tests/`：三语言对拍测试——`good.md` 三版须 VALID 且摘要一致，`bad1..5` 三版须一致拒绝
+- `scripts/`：§4.1 确定性校验器的双语言等价参考实现（PowerShell / bash+gawk），共享同一 Schema 与失败语义，对同一 handoff 文件产出一致的 VALID/INVALID 判定与 SHA-256 字节摘要
+- `tests/`：双语言对拍测试——`good.md` 须 VALID 且 SHA-256 摘要等于文件自身字节摘要，`bad1..5` 须一致拒绝
 
 ## 当前验证范围
 
-本文档定义协议约束。`scripts/validate_handoff.{py,ps1,sh}` 提供 §4.1 确定性校验器的等价参考实现：安全 YAML 解析（拒绝重复键、未知键、锚点/别名、多文档）、Schema 与枚举/类型校验、TL;DR 结构与状态交叉不变量、以及 SHA-256 字节摘要。三语言同构，对同一 handoff 文件产出相同的 VALID/INVALID 判定与字节摘要。
+本文档定义协议约束。`scripts/validate_handoff.{ps1,sh}` 提供 §4.1 确定性校验器的等价参考实现：安全 YAML 解析（拒绝重复键、未知键、锚点/别名、多文档）、Schema 与枚举/类型校验、TL;DR 结构与状态交叉不变量、以及 SHA-256 字节摘要。双语言同构，对同一 handoff 文件产出相同的 VALID/INVALID 判定与字节摘要。
 
 候选→正式文件的原子替换、候选与正式文件摘要比对、写入失败/部分写入/损坏时的恢复编排仍由具体宿主环境按 §4.1 的事务边界落地；上述脚本提供其中的「校验」与「摘要」两个原语，不替代事务编排本身。

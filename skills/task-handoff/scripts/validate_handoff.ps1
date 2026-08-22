@@ -1,4 +1,4 @@
-# validate_handoff.ps1 - task-handoff v2 deterministic validator (PowerShell, parity with Python)
+# validate_handoff.ps1 - task-handoff v2 deterministic validator (PowerShell)
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File validate_handoff.ps1 <file>
 # Exit 0 = VALID (prints VALID + DIGEST); 1 = invalid; 2 = file not found.
 # ASCII-only to avoid Windows PowerShell 5.1 GBK misdecode of UTF-8 scripts.
@@ -41,7 +41,7 @@ if ([System.Text.Encoding]::UTF8.GetByteCount($text) -ne $bytes.Length) { Fail("
 # Normalize line endings for parsing (digest still computed on raw bytes via Get-FileHash)
 $text = $text -replace "`r`n","`n" -replace "`r","`n"
 
-# Mirror Python: split on "---`n" twice
+# Split on the two "---`n" markers
 $marker = "---`n"
 $i1 = $text.IndexOf($marker)
 if ($i1 -ne 0) { Fail("missing Front Matter start ---") }
@@ -155,7 +155,7 @@ if ($evidence.Count -eq 1){
   }
 }
 
-# TL;DR structure (mirror Python: tldr = body up to next "\n# " or end; start at 1 to skip the TL;DR heading itself)
+# TL;DR structure (tldr = body up to next "\n# " or end; start at 1 to skip the TL;DR heading itself)
 if (-not $body.TrimStart().StartsWith("# TL;DR")) { Fail("first heading after YAML must be # TL;DR") }
 $tEnd = $body.IndexOf("`n# ", 1)
 $tldr = if ($tEnd -ge 0) { $body.Substring(0, $tEnd) } else { $body }
