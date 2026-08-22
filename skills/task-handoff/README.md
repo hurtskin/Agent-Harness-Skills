@@ -195,12 +195,19 @@ TL;DR 不是空标题骨架：`Objective` 至少一个非空目标；`Current St
 ```text
 task-handoff/
 ├── README.md
-└── SKILL.md
+├── SKILL.md
+└── scripts/
+    ├── validate_handoff.py
+    ├── validate_handoff.ps1
+    └── validate_handoff.sh
 ```
 
 - `SKILL.md`：Skill 的触发条件、执行规范、状态机和完整约束
 - `README.md`：面向使用者的能力说明和快速使用指南
+- `scripts/`：§4.1 确定性校验器的三语言等价参考实现（Python / PowerShell / bash+gawk），共享同一 Schema 与失败语义，对同一 handoff 文件产出一致的 VALID/INVALID 判定与 SHA-256 字节摘要
 
 ## 当前验证范围
 
-本文档定义协议约束；安全 YAML 解析器、确定性校验、原子替换、SHA-256 摘要比对及故障恢复能力需由具体宿主环境提供并验证。
+本文档定义协议约束。`scripts/validate_handoff.{py,ps1,sh}` 提供 §4.1 确定性校验器的等价参考实现：安全 YAML 解析（拒绝重复键、未知键、锚点/别名、多文档）、Schema 与枚举/类型校验、TL;DR 结构与状态交叉不变量、以及 SHA-256 字节摘要。三语言同构，对同一 handoff 文件产出相同的 VALID/INVALID 判定与字节摘要。
+
+候选→正式文件的原子替换、候选与正式文件摘要比对、写入失败/部分写入/损坏时的恢复编排仍由具体宿主环境按 §4.1 的事务边界落地；上述脚本提供其中的「校验」与「摘要」两个原语，不替代事务编排本身。
