@@ -100,7 +100,7 @@ foreach ($l in $yamlLines){
   }
   Fail("unparseable line: $l")
 }
-if ($mode -ceq "seq" -and $curElem){ $evidence += ,$curElem }
+if ($curElem){ $evidence += ,$curElem }
 
 # top-level field set exact equality
 $uniqTop = @{}
