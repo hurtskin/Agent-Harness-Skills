@@ -38,7 +38,7 @@ $bytes = [System.IO.File]::ReadAllBytes($Path)
 # UTF-8 check: decode then re-encode, byte length must match
 $text = [System.Text.Encoding]::UTF8.GetString($bytes)
 if ([System.Text.Encoding]::UTF8.GetByteCount($text) -ne $bytes.Length) { Fail("UTF-8 decode failed") }
-# Normalize line endings for parsing (digest still computed on raw bytes via Get-FileHash)
+# Normalize line endings for parsing (digest still computed on raw bytes below)
 $text = $text -replace "`r`n","`n" -replace "`r","`n"
 
 # Split on the two "---`n" markers
@@ -176,7 +176,9 @@ if ($errs.Count -gt 0){
   [Console]::Error.WriteLine(($errs -join "`n"))
   exit 1
 }
-$digest = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLower()
+$sha = [System.Security.Cryptography.SHA256]::Create()
+$digest = (($sha.ComputeHash($bytes)) | ForEach-Object { $_.ToString("x2") }) -join ''
+$sha.Dispose()
 [Console]::Out.WriteLine("VALID")
 [Console]::Out.WriteLine("DIGEST $digest")
 exit 0
