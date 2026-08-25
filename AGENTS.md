@@ -105,26 +105,18 @@ uv run --no-project python -m unittest discover -s skills/task-handoff/tests -v
 |---|---|---|---|---|
 | Trae | `AGENTS.md` | active | 运行时证据 | 2026-08-21 |
 
-## AGENTS.md 变更日志
+## AGENTS.md 变更日志（可选，决策 v21）
+
+> 本节为可选人类时间线展示（决策 v21）；只挂结构级变化（章节增删 / 协作原则改写 / 模板验收清单改写 / v* 决策落地）。过程性条目（修脚本 / 加注释 / 删错别字）走 `decisions/_INDEX.md` 而非变更日志。追溯唯一入口：决策关键词检索 `decisions/_INDEX.md`。
 
 - 2026-08-05：初始化规范治理短导航，登记 Trae 入口，建立 P1/P2 索引和共享工具命令。
-- 2026-08-21：术语全局更名 Hermes → Agent Harness（含仓库名义和 Skill 触发词），文档体系与流程不变。
-- 2026-08-21：确认 Trae 整目录加载 `.trae/rules/`，lessons 实际常驻；按用户决策接受该权衡，相关文档改为如实描述。
-- 2026-08-21：迁移到三事实源体系（决策 v4）：soul 与 lessons-learned 正文并入本文件，删除 `.trae/rules/` 旧文件，闭环排期 #005。
-- 2026-08-21：适配器收窄为仅 Claude Code（决策 v8）；临时文件红线改为 `temp_*` 命名 + 使用后立即删除；P1 索引新增 Spec 层级约定。
-- 2026-08-21：废弃 MCP 与 changelog-rag，决策日志迁移为 `decisions/` 目录（决策 v9）；`_INDEX.md` 成为决策检索入口，删除 `tools/` 与 `.trae/`。
-- 2026-08-21：补齐 v9 执行遗漏（决策 v10）：排期清单模板闭环规则改 decisions/ 工作流，drift-check D5 适配说明补新体系扫描源；登记教训 L-001。
-- 2026-08-21：排期清单更名 `BACKLOG.md`（决策 v11）；中文"排期清单"保留为模块标签。
-- 2026-08-21：收编 `spec-writing` 为第三个发布 Skill（决策 v12）；删除 crawl 项目专属适配声明，规范本体未改。
-- 2026-08-21：初始化新增协作模式询问，AGENTS.md 项目定位标记协作模式（决策 v13）；本仓库为单人。
-- 2026-08-21：删除「Agent 工具适配」小节及目录锚点（决策 v8/v9 后的残留自指记录）；Trae 入口事实由本文件被加载即证。
-- 2026-08-21：上一条所述删除系误操作，「Agent 工具适配」小节与目录锚点已恢复；结构回归单人模式 11 章节，与 skill core-documents.md §4 一致。
-- 2026-08-21：落地多人协同模式（决策 v14）：三层结构（共享宪法 + decisions/ + .agents/ 个人层）、起草-确认制、决策序号晋升认领与撞号规则；本仓库为单人模式，不建 .agents/。
-- 2026-08-22：协作原则增补路径成对（L0 / stop·drift-lite）：契约侧 `specs/`·openapi·schema ↔ 实现侧本仓库 `skills/`（及可选 `src/`）；明确不改动 `specs/<模块>/<功能>/` 三件套层级，成对只约束变更集两侧是否同现；P1 索引与文档职责同步。
-- 2026-08-22：`spec-writing` 小步升格 Properties（第 5 部分附 + 自检 Q16/Q17）；10 段骨架不变；Hypothesis 不强制全仓 CI。
-- 2026-08-22：`bootstrap-agent-workspace` 增加「路径成对钩子」模块（`tools/path_align_hooks/` 通用模板）；完整工具链默认包含；不写分 Harness 适配长文。
-- 2026-08-22：移除遗留 `drift-check`（D1–D6）模板；结构漂移统一为 drift-inventory + verify-matrix。
-- 2026-08-22：本发布仓停用 Cursor path-align `stop` hook（`.cursor/hooks.json` 空 hooks）；避免 Skill 文档改动误触 CODE_WITHOUT_SPEC。
-- 2026-08-22：本发布仓 `specs/` 改 gitignore（不以 Spec 驱动本仓）；验证命令去掉 Hypothesis pilot；README 重心调整为规范化契约。
-- 2026-08-22：新增 `scripts/check_links.py` 仓库级链接校验（目标缺失 + 被 gitignore 两类死链），纳入真实验证命令与 CI；`.gitignore` `tools/` 改 `/tools/` 锚定根，解除对 `skills/spec-writing/tools/` 误杀并补跟踪；P1 索引 path-align 模板路径更正为 `skills/.../templates/path_align_hooks/`；README「双层守门」补 turn-end 条件化说明。
-- 2026-08-25：path-align / verify-matrix / drift-inventory 三模块的宿主接线 + 模板脚本路径锚定形成 v17/v18/v19/v20 决策序列；SKILL §1.5/§3.2、modules/path-align-hooks.md、modules/verify-matrix.md、templates/{spec_hooks、spec_verification/hooks、drift_inventory、path_align_hooks}/README、workflows/verification.md、spec-writing/SKILL.md §0/§3/§5.1/§5.2/§5.3、COMMON.md §6.1 同步落地；BACKLOG #003/#004 闭环（决策 v19 本仓 dogfood 试跳证据 + 失败兜底），BACKLOG #005 闭环（决策 v20 `__file__` / `$PSScriptRoot` / `git rev-parse` 三层回退替代 `..\..` / `inventory_path.parent.parent` 硬假设，跨 `specs/`、`tools/`、项目约定目录无脚本改动）。
+- 2026-08-21：术语全局更名 Hermes → Agent Harness（决策 v2）。
+- 2026-08-21：迁移到三事实源体系（决策 v4）：soul 与 lessons-learned 并入本文件。
+- 2026-08-21：适配器收窄为仅 Claude Code（决策 v8）；临时文件红线改为 `temp_*` 命名。
+- 2026-08-21：废弃 MCP 与 changelog-rag，决策日志迁移到 `decisions/` 目录（决策 v9）。
+- 2026-08-21：落地多人协同模式（决策 v14）：三层结构 + 起草-确认制；本仓库单人，不建 `.agents/`。
+- 2026-08-22：协作原则增补路径成对（L0 / stop·drift-lite）（决策 v15）。
+- 2026-08-22：`bootstrap-agent-workspace` 增加「路径成对钩子」模块 + 移除遗留 `drift-check` 模板（决策 v15）。
+- 2026-08-22：新增 `scripts/check_links.py` 仓库级链接校验（目标缺失 + 被 gitignore 两类死链）。
+- 2026-08-25：v17/v18/v19/v20 决策序列落地（path-align + verify-matrix + drift-inventory 自动接线与路径硬假设收敛）。
+- 2026-08-25：变更日志章节本身从必填改为可选（决策 v21）；未来过程性条目不再默认追加。
