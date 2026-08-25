@@ -32,8 +32,8 @@
 
 - [ ] `tools/path_align_hooks/` 含 `drift_lite` 与 `turn_align` 的 `.ps1` / `.sh` 与 README
 - [ ] 独立运行 `drift_lite` 能输出含 `ok` 的 JSON
-- [ ] 未在产物中写入某 Harness 专属 hooks 配置作为「标准答案」
-- [ ] 宿主支持 hook 时：已按当前工具惯例注册 `turn_align`（或在执行结果中说明已跳过注册及原因）
+- [ ] 宿主 hook 配置文件已按当前 Harness 官方提示生成并落地（如 `.cursor/hooks.json` / `.claude/settings.json` / 其他惯例路径）；未在本仓维护「标准答案样板」（决策 v17）
+- [ ] `turn_align.{ps1,sh}` 已注册到「轮次结束」类事件，工作目录为仓库根；或宿主不支持时已在执行结果中说明「宿主未启用会话结束 hook，仅作手动调用」
 
 ## verify-matrix（选择时）
 

@@ -2,6 +2,10 @@
 
 > 仅示例，未写入 `skills/`。解释器由 Agent / 开发者通过 `$env:PYTHON` 或 `-Python` 指定。
 
+> **路径硬假设（决策 v20）**：`run_verify.{ps1,sh}` 与 `pre_commit_entry.{ps1,sh}` 用 `$PSScriptRoot` / `BASH_SOURCE` 锚定脚本自身目录，算 `RepoRoot` 走三层回退（`-RepoRoot` 显式入参 → `git rev-parse --show-toplevel` → 上溯 `AGENTS.md`）。可放在 `<repo>/specs/verification/`、`<repo>/tools/spec_verification/`、或项目约定的其他目录，**无需改脚本**。调用方只需保证 `run_verify.{ps1,sh}` 与 `hooks/pre_commit_entry.{ps1,sh}` 同目录（前者上一级 = 后者所在目录）。
+
+> **Agent 默认行为（决策 v18）**：bootstrap 时 Agent 复用 SKILL §1.2 已识别的 Harness 类型，从下表「三种接法」中按当前 Harness 提示选最匹配的一套自动生成宿主配置并执行安装命令。未识别 Harness **必问用户**，不得默认跳过接线，也不得默认套 Trae。
+
 ## 三种接法
 
 | 方式 | 适用 | 入口 |

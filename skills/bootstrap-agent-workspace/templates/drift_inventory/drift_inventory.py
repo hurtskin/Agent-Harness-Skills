@@ -293,14 +293,14 @@ def main(argv: list[str] | None = None) -> int:
         "--profiles",
         type=Path,
         default=None,
-        help="language_profiles.yaml (default: sibling of inventory parent)",
+        help="language_profiles.yaml (default: sibling of this script)",
     )
     parser.add_argument("--format", choices=("text", "json"), default="text")
     args = parser.parse_args(argv)
 
     repo = args.repo_root.resolve()
     inventory_path = args.inventory.resolve()
-    profiles_path = args.profiles or inventory_path.parent.parent / "language_profiles.yaml"
+    profiles_path = args.profiles or Path(__file__).resolve().parent / "language_profiles.yaml"
 
     inv = parse_simple_yaml(inventory_path)
     sources = inv.get("sources", {})

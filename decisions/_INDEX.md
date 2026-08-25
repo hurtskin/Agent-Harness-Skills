@@ -18,5 +18,9 @@
 | [012](012-v12-add-spec-writing-skill.md) | v12 | spec-writing,新 Skill,收编,发布单元,README,适配声明,crawl 残留 | 活跃 | spec-writing |
 | [013](013-v13-collaboration-mode.md) | v13 | 多人协同,协作模式,collaboration_mode,初始化询问,项目定位,标记 | 活跃 | bootstrap-agent-workspace |
 | [014](014-v14-multi-collab-agents-layer.md) | v14 | 多人协同,协作模式,.agents,个人层,共享宪法,晋升流程,序号认领,撞号,起草确认制,gitignore | 活跃 | bootstrap-agent-workspace |
-| [015](015-v15-path-align-default-correctness-gate.md) | v15 | 完整工具链,路径成对,path-align,drift-check,可选高级,Correctness,变更门,Properties,PBT | 活跃 | bootstrap-agent-workspace, spec-writing |
+| [015](015-v15-path-align-default-correctness-gate.md) | v15 | 完整工具链,路径成对,path-align,drift-check,可选高级,Correctness,变更门,Properties,PBT | 归档（见 017） | bootstrap-agent-workspace, spec-writing |
 | [016](016-v16-task-handoff-validator-ci.md) | v16 | task-handoff,校验器,validate_handoff,双语言,ps1/sh,移除 py,对拍,fixtures,CI,单条 evidence 缺陷 | 活跃 | task-handoff |
+| [017](017-v17-path-align-agent-host-hook.md) | v17 | path-align,宿主接线,Harness 提示,自动接线,turn_align,hooks.json,settings.json,SKILL §1.5/§3.2 | 活跃 | bootstrap-agent-workspace |
+| [018](018-v18-pre-commit-auto-wire-by-harness.md) | v18 | pre-commit,verify-matrix,drift-inventory,自动接线,Harness 提示,pre-commit 框架,Git 原生 hook,bootstrap,SKILL §0 | 活跃 | bootstrap-agent-workspace, spec-writing |
+| [019](019-v19-v17-v18-dogfood-closure.md) | v19 | v17,v18,自动接线,dogfood,turn_align,pre_commit_entry,模板布局,失败兜底,COMMON §6.1,发布仓,CODE_WITHOUT_SPEC | 活跃 | bootstrap-agent-workspace |
+| [020](020-v20-script-path-anchor-hardcoded-layout.md) | v20 | 模板脚本,硬假设,git rev-parse,__file__,BASH_SOURCE,RepoRoot,language_profiles.yaml,pre_commit_entry,drift_inventory,跨布局 | 活跃 | bootstrap-agent-workspace |

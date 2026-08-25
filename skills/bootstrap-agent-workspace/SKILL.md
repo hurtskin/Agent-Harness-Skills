@@ -14,6 +14,7 @@ description: "跨 Agent Harness 初始化 AI Agent 工作区。SKILL.md 仅负�
 3. 首次引导先按用户目的询问**场景套餐**（含适合项目规模说明）。
 4. 用户选择「自定义能力」时，再显示技术模块多选。
 5. 汇报「套餐 / 技术模块 / 将加载的文档 / 将生成的产物」，等待用户确认。
+   - 若含路径成对钩子：必须把「宿主 hook 配置文件（如 `.cursor/hooks.json` / `.claude/settings.json` / 其他 Harness 惯例路径）」列在「将生成的产物」中，等待用户确认；未识别 Harness 时**必问用户**。
 6. 只读取用户确认选中的流程或模块文档。
 7. 执行完成后按 [`workflows/verification.md`](./workflows/verification.md) 校验选中范围。
 
@@ -49,8 +50,8 @@ description: "跨 Agent Harness 初始化 AI Agent 工作区。SKILL.md 仅负�
 路由规则：
 
 - 未选 verify-matrix / drift-inventory：不复制 `specs/verification/`、`specs/drift/`，不在 AGENTS 登记。
-- 未选路径成对钩子：不复制 `tools/path_align_hooks/`。
-- 选路径成对钩子：只落地通用脚本；宿主 hook 由执行 Agent 注册。
+- 未选路径成对钩子：不复制 `tools/path_align_hooks/`，不生成宿主 hook 配置。
+- 选路径成对钩子：落地通用脚本（`tools/path_align_hooks/turn_align.{ps1,sh}`），**Agent 按所识别 Harness 的官方 hook 提示生成对应宿主配置文件**（如 `.cursor/hooks.json` / `.claude/settings.json` / 其他惯例路径），并把 `turn_align` 注册到「轮次结束」类事件，工作目录为仓库根。未识别 Harness 走「必问用户」，不得默认跳过接线，也不得默认套 Trae。
 
 ## 4. 启动询问
 

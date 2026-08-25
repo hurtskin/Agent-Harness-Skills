@@ -12,7 +12,7 @@ tools/path_align_hooks/
 └── turn_align.ps1 | turn_align.sh
 ```
 
-不要改脚本业务逻辑去迁就某个 Agent Harness；**挂载方式由当前 Harness 的 hook 机制决定**（执行本模块的 Agent 按当前工具惯例注册即可）。本 Skill **不**维护各 Harness 的逐一适配说明。
+不要改脚本业务逻辑去迁就某个 Agent Harness；**hook 配置文件由执行 Agent 在 bootstrap 时按当前 Harness 提示生成并落地**（决策 v17）。本 Skill **不**维护各 Harness 的逐一适配说明。
 
 ## 脚本职责
 

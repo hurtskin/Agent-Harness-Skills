@@ -131,6 +131,77 @@
 
 工具适配入口只负责让当前工具加载该流程，不得另建相互冲突的流程副本。
 
+### 6.1 v17/v18 自动接线 dogfood 步骤（消费者项目首次初始化必跑）
+
+> 本节是决策 v17（path-align 宿主 hook 自动接线）+ v18（pre-commit 自动注册）的最小落地证据。执行 Agent 在消费者项目首次 bootstrap（自定义能力含 path-align 或 verify-matrix / drift-inventory）后必须按本节跑一次最小试跳并把证据贴回执行结果；未跑 = 该模块初始化未闭环。决策闭环参考：发布仓 `decisions/019-v19-v17-v18-dogfood-closure.md`（消费者项目按自身事实源定位本仓对应决策）。
+
+#### 6.1.1 路径成对（path-align，含 turn-end 自动接线）
+
+> 决策 v17：模板脚本必须物理落地到目标项目 `tools/path_align_hooks/`；宿主 hook 配置按当前 Harness 提示生成并注册。
+
+```powershell
+# 1) 复制模板（如已复制则跳过）
+Copy-Item -Recurse -Force skills/bootstrap-agent-workspace/templates/path_align_hooks/* tools/path_align_hooks/
+
+# 2) 最小事件试跳（不解 stdin 时给空 payload）
+echo '' | powershell -NoProfile -ExecutionPolicy Bypass -File tools/path_align_hooks/turn_align.ps1
+
+# 期望：stderr 含 [turn_align] status=... parse_ok=...；exit 0；stdout 为 `{}` 或 nudge JSON。
+```
+
+宿主 hook 接线（示例：Cursor `stop` 事件）：
+
+```json
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/path_align_hooks/turn_align.ps1",
+        "cwd": "<repo-root>",
+        "env": { "PATH_ALIGN_NUDGE": "1" }
+      }
+    ]
+  }
+}
+```
+
+未识别 Harness → **必问用户**（不得默认套 Trae / 不得默认跳过）。详见 [`modules/path-align-hooks.md`](./modules/path-align-hooks.md)。
+
+#### 6.1.2 验证矩阵 + 结构漂移（pre-commit 自动注册）
+
+> 决策 v18：模板复制到 `specs/verification/`（含 `hooks/pre_commit_entry.{ps1,sh}`、`run_verify.{ps1,sh}`、`.pre-commit-config.yaml.example`）；Agent 按当前 Harness pre-commit 机制（pre-commit 框架 / Git 原生 hook / 必问）选一套自动生成宿主配置并安装。
+
+```powershell
+# 1) 复制模板
+Copy-Item -Recurse -Force skills/bootstrap-agent-workspace/templates/spec_verification specs/verification
+
+# 2) 最小试跳（无 staged watch 时应 nothing to run）
+powershell -NoProfile -ExecutionPolicy Bypass -File specs/verification/hooks/pre_commit_entry.ps1 -Python python
+
+# 期望：stderr 含 `[verify] pre-commit: nothing to run (ok)`；exit 0。
+```
+
+宿主 pre-commit 接线二选一：
+
+- **pre-commit 框架**：`Copy-Item specs/verification/.pre-commit-config.yaml.example .pre-commit-config.yaml` + `pre-commit install`。
+- **Git 原生 hook**：`Copy-Item specs/verification/hooks/pre-commit.example .git/hooks/pre-commit`（Windows 用 `.ps1.example`）。
+
+未识别 Harness → **必问用户**。详见 [`modules/verify-matrix.md`](./modules/verify-matrix.md) §3 与 [`templates/spec_verification/hooks/README.md`](./templates/spec_verification/hooks/README.md)。
+
+#### 6.1.3 失败兜底（必问 / 跳过 / 留模板）
+
+任一自动接线步骤遇到下列情况即停止推进，在执行结果中汇报「**未识别 Harness / 宿主不支持 / 物理布局冲突**」并保留模板，等待用户决策：
+
+- 未识别 Harness（无法从 SKILL §1.2 推断）。
+- 宿主不支持 turn-end / pre-commit 任一事件。
+- **模板物理布局与目标项目布局冲突（兜底，已被决策 v20 大幅收敛）**：
+  - v20 已用 `__file__` / `$PSScriptRoot` / `git rev-parse --show-toplevel` 三层回退替代 `..\..` / `inventory_path.parent.parent` 等硬假设；`drift_inventory.py` / `pre_commit_entry.{ps1,sh}` 跨 `specs/`、`tools/`、项目约定目录均可工作，**无需改脚本**。
+  - 仍保留本兜底分类的原因：(a) 消费者项目历史副本未同步刷新到 v20+ 模板；(b) 消费者自定义路径走偏（如 `run_verify.ps1` 找不到 `matrix.yaml`，因 `matrix.yaml` 不在脚本同目录）；(c) 模板外脚本（如旧版 `drift_inventory.py`）未升级。
+  - 处置：发现冲突 → 拉取最新 `templates/`（`Copy-Item -Recurse -Force skills/bootstrap-agent-workspace/templates/spec_verification specs/verification` 等）+ 重跑 §6.1.1 / §6.1.2 试跳；仍冲突则在执行结果中标记「物理布局冲突」并保留模板，等用户决策。
+
+发布仓自身（`Agent Harness Skills`）按 AGENTS.md 变更日志 2026-08-22 决定**故意不接** `.cursor/hooks.json` 的 stop 与 `.git/hooks/pre-commit`；dogfood 步骤仍按 §6.1.1 / §6.1.2 跑通脚本试跳，作为决策 v19 闭环证据；v20 路径硬假设收敛已在决策 `020-v20-script-path-anchor-hardcoded-layout.md` 闭环。
+
 ## 8. 验收
 
 完成后读取 `workflows/verification.md`，只校验用户选择的模块。通用检查：
