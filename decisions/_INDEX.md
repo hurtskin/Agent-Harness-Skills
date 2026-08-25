@@ -25,3 +25,4 @@
 | [019](019-v19-v17-v18-dogfood-closure.md) | v19 | v17,v18,自动接线,dogfood,turn_align,pre_commit_entry,模板布局,失败兜底,COMMON §6.1,发布仓,CODE_WITHOUT_SPEC | 活跃 | bootstrap-agent-workspace |
 | [020](020-v20-script-path-anchor-hardcoded-layout.md) | v20 | 模板脚本,硬假设,git rev-parse,__file__,BASH_SOURCE,RepoRoot,language_profiles.yaml,pre_commit_entry,drift_inventory,跨布局 | 活跃 | bootstrap-agent-workspace |
 | [021](021-v21-agents-changelog-slim.md) | v21 | AGENTS.md,变更日志,瘦身,结构级,过程性,decisions/_INDEX,模板,core-documents §13,verification 验收清单 | 活跃 | bootstrap-agent-workspace |
+| [022](022-v22-collab-principles-rewrite.md) | v22 | 协作原则,不猜多问,先对齐后行动,Bug 三段式,改动面自检,诊断禁动契约侧,core-documents §3,COMMON §5,模板同步 | 活跃 | global |

@@ -52,8 +52,14 @@ uv run --no-project python -m unittest discover -s skills/task-handoff/tests -v
 
 ## 协作原则
 
-- 不猜测；证据不足时先询问。只做满足已确认任务所需的最小改动，不顺手重构。
-- 业务行为、架构、接口或数据模型变更必须文档先行：定位现行 Spec/决策，先展示文档差异并获确认，再严格落代码。
+- **不猜多问**：有歧义先问，不臆测数据字段、路径或用户意图
+- **先对齐后行动**：改动前先展示方案/文档差异并等待确认；Bug 处理先报告根因与证据，确认后再修复
+  - **Bug 任务强制三段式**：(1) 诊断阶段 = 只读（log/源码/产物），不准写业务代码、不准加新插桩、不准改实现，输出"唯一根因 + 证据 + 候选修复点"列表；(2) 等用户确认修复点与方案；(3) 实施阶段才写代码。任何"诊断中直接改代码"都属违规
+  - **禁止顺手优化**：诊断或实施过程中遇到"可顺手改的别处"必须停下报告，征得显式同意后再做；不许借修 Bug 之名重写其它模块
+- **最小改动**：只改任务要求的部分，不做无关重构或「顺手优化」
+  - **改动面自检清单**（提交前过一遍）：(a) 每个被改动的文件/函数是否在用户授权范围内？(b) 是否引入了用户未请求的新增 helper / class / 配置项？(c) 是否动了非失败路径的代码？任何一项"是" → 回退并重新申请授权
+- **文档先于代码**：业务/架构/接口/行为规则变更必须先改 Spec 再改代码，严格按文档实施不二次发挥；发现 Spec 缺口先暂停补 Spec
+  - **诊断阶段禁动契约侧**（`specs/`、`decisions/`、`AGENTS.md`、`BACKLOG.md`、README）：Bug 诊断期间这些文件一律只读；若发现 Spec 缺口，先在 AskUserQuestion 里提议补 Spec 三件套，得到授权后再写
 - **路径成对（L0，stop / drift-lite）**：不看文件内容是否正确，只看本轮 git dirty 是否同时触及「契约侧」与「实现侧」。只改一侧会记 `CODE_WITHOUT_SPEC` 或 `SPEC_WITHOUT_CODE`，默认可能 followup 催补；`PATH_ALIGN_NUDGE=0` / `STOP_ALIGN_FOLLOWUP=0` 可关闭催改。这不是 Correctness/行为证明，只防明显单边漂移。**本发布仓**不跟踪 `specs/`、也不以 Spec 驱动开发——改 `skills/` 文档时不必强行补 `specs/`（可 A2 说明故意单边）；该约定主要服务装了路径成对钩子的**消费者项目**。**本仓本地不启用** Cursor path-align hook（`.cursor/hooks.json` 无 `stop` 接线）；模板仅随 bootstrap 发给消费者。
   - **契约侧**（消费者）：`specs/`、路径含 `openapi`、`*.schema.json`
   - **实现侧**：`skills/` / `src/` / 常见源码后缀（以脚本为准）
@@ -61,7 +67,6 @@ uv run --no-project python -m unittest discover -s skills/task-handoff/tests -v
 - **Correctness 变更门**（写给 Skill 消费者）：写 `P-*` 与跑 `PT-*` 分轨；命中相关实现或性质正文才跑对应 PT。本仓不强制、不嵌入全仓 PBT。细则见 `skills/spec-writing/SKILL.md`。
 - **drift-inventory**：结构漂移 L1/L2（inventory + regex profile）；**verify-matrix**：Correctness 验证；bootstrap 完整工具链默认 = 核心 + 排期 + 路径成对；规范交付套餐加 verify + drift。
 - 优先使用 IDE 的读取、搜索、编辑、删除等专用工具；终端仅用于 Git、依赖、构建和测试。
-- Bug 先报告现象、证据、影响与拟修复范围，得到确认后再修复。
 - 每次会话从本文件获取当前入口；P1 仅在任务命中时读取，P2（`decisions/`）先读 `decisions/_INDEX.md` 按关键词定位，再读对应决策文件，不复制全文。
 
 ## 红线
@@ -120,3 +125,4 @@ uv run --no-project python -m unittest discover -s skills/task-handoff/tests -v
 - 2026-08-22：新增 `scripts/check_links.py` 仓库级链接校验（目标缺失 + 被 gitignore 两类死链）。
 - 2026-08-25：v17/v18/v19/v20 决策序列落地（path-align + verify-matrix + drift-inventory 自动接线与路径硬假设收敛）。
 - 2026-08-25：变更日志章节本身从必填改为可选（决策 v21）；未来过程性条目不再默认追加。
+- 2026-08-25：协作原则章节强约束升级——「不猜多问 / 先对齐后行动 / Bug 三段式 / 改动面自检 / 诊断禁动契约侧」（决策 v22）。
